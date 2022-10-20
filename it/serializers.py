@@ -48,7 +48,7 @@ class equiposSerializers(serializers.ModelSerializer):
             )
         ]
     def to_representation(self, value):
-        return {'id': value.id_id,'serial': value.serial,'serial_cargador': value.serial_cargador,'serial_unidad': value.serial_unidad,'dd': value.dd,'ram': value.ram,'tipo_ram': value.tipo_ram,'csb': value.csb,'tipo_equipo': value.tipo_equipo,'antivirus': value.antivirus,'usuario_so': value.usuario_so,'so': value.so,'modelo': value.modelosforeignkey.nombre ,'usuario': { 'id': value.usuariosforeignkey.id, 'nombre': value.usuariosforeignkey.nombre}}
+            return {'id': value.id_id,'serial': value.serial,'serial_cargador': value.serial_cargador,'serial_unidad': value.serial_unidad,'dd': value.dd,'ram': value.ram,'tipo_ram': value.tipo_ram,'csb': value.csb,'tipo_equipo': value.tipo_equipo,'antivirus': value.antivirus,'usuario_so': value.usuario_so,'so': value.so,'modelo': value.modelosforeignkey.nombre ,'usuario': { 'id': value.usuariosforeignkey.id, 'nombre': value.usuariosforeignkey.nombre}}
 
 class ubicacionesSerializers(serializers.ModelSerializer):
     class Meta:

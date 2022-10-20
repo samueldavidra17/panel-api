@@ -8,7 +8,7 @@ class equiposViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
     serializer_class = equiposSerializers
     filter_backends = [filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend]
-    search_fields = ['serial','usuario_so']
+    search_fields = ['serial','serial_cargador','serial_unidad','dd','ram','tipo_ram','csb','tipo_equipo','antivirus','usuario_so','so']
     filterset_fields = ['usuariosforeignkey_id']
 
 class impresorasViewSet(viewsets.ModelViewSet):

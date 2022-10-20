@@ -29,7 +29,7 @@ class informacion(models.Model):
     estatus = models.CharField(max_length=45)
     asignacion = models.CharField(max_length=45)
     observacion = models.TextField()
-    ubicacionesforeignkey = models.ForeignKey(ubicaciones, on_delete=models.CASCADE, related_name="ubicaciones_user", null="True")
+    ubicacionesforeignkey = models.ForeignKey(ubicaciones, on_delete=models.CASCADE, related_name="ubicaciones_user", default=1)
     # usuariosforeignkey = models.ForeignKey(usuarios, on_delete=models.CASCADE, related_name="informacion_us", null="True")
 
 class modelos(models.Model):
@@ -39,7 +39,7 @@ class modelos(models.Model):
 class equipos(models.Model):
     id = models.OneToOneField(informacion, primary_key=True, unique=True, on_delete=models.CASCADE, related_name="informacion_eq")
     tipo_equipo = models.CharField(max_length=45)
-    modelosforeignkey = models.ForeignKey(modelos, on_delete=models.CASCADE, related_name="modelos_eq", null="True")
+    modelosforeignkey = models.ForeignKey(modelos, on_delete=models.CASCADE, related_name="modelos_eq", default=1)
     serial = models.CharField(max_length=45)
     serial_unidad = models.CharField(max_length=45)
     serial_cargador = models.CharField(max_length=45)
@@ -50,7 +50,7 @@ class equipos(models.Model):
     antivirus = models.CharField(max_length=45)
     so = models.CharField(max_length=45)
     usuario_so = models.CharField(max_length=45)
-    usuariosforeignkey = models.ForeignKey(usuarios, on_delete=models.CASCADE, related_name="equipos_us", null="True")
+    usuariosforeignkey = models.ForeignKey(usuarios, on_delete=models.CASCADE, related_name="equipos_us", default=3)
 
 class impresoras(models.Model):
     codigo_inventario = models.CharField(max_length=45)
