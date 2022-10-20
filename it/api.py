@@ -7,19 +7,23 @@ class equiposViewSet(viewsets.ModelViewSet):
     queryset = equipos.objects.all()
     permission_classes = [permissions.AllowAny]
     serializer_class = equiposSerializers
-    filterset_fields = []
+    filter_backends = [filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend]
+    search_fields = ['serial','usuario_so']
+    filterset_fields = ['usuariosforeignkey_id']
 
 class impresorasViewSet(viewsets.ModelViewSet):
     queryset = impresoras.objects.all()
     permission_classes = [permissions.AllowAny]
     serializer_class = impresorasSerializers
-    filterset_fields = []
+    filter_backends = [filters.SearchFilter]
+    search_fields = []
 
 class dispositivosViewSet(viewsets.ModelViewSet):
     queryset = dispositivos.objects.all()
     permission_classes = [permissions.AllowAny] 
     serializer_class = dispositivosSerializers
-    filterset_fields = []
+    filter_backends = [filters.SearchFilter]
+    search_fields = []
 
 class modelosViewSet(viewsets.ModelViewSet):
     queryset = modelos.objects.all()
@@ -33,13 +37,15 @@ class marcasViewSet(viewsets.ModelViewSet):
     queryset = marcas.objects.all()
     permission_classes = [permissions.AllowAny] 
     serializer_class = marcasSerializers
-    filterset_fields = []
+    filter_backends = [filters.SearchFilter]
+    search_fields = []
 
 class informacionViewSet(viewsets.ModelViewSet):
     queryset = informacion.objects.all()
     permission_classes = [permissions.AllowAny] 
     serializer_class = informacionSerializers
-    filterset_fields = []
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['asignacion']
 
 class ubicacionesViewSet(viewsets.ModelViewSet):
     queryset = ubicaciones.objects.all()
@@ -59,7 +65,8 @@ class departamentosViewSet(viewsets.ModelViewSet):
     queryset = departamentos.objects.all()
     permission_classes = [permissions.AllowAny] 
     serializer_class = departamentoSerializers
-    filterset_fields = []
+    filter_backends = [filters.SearchFilter]
+    search_fields = []
 
 class empresasViewSet(viewsets.ModelViewSet):
     queryset = empresas.objects.all()
