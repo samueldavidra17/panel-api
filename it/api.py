@@ -1,6 +1,6 @@
 from .models import empresas, marcas, departamentos, ubicaciones, usuarios, informacion, modelos, equipos, impresoras, dispositivos
 from rest_framework import viewsets, permissions, filters
-from .serializers import equiposSerializers, impresorasSerializers, dispositivosSerializers, modelosSerializers, marcasSerializers, informacionSerializers, ubicacionesSerializers, usuariosSerializers, departamentoSerializers, empresasSerializers
+from .serializers import equiposSerializers, equiposSerializersMin, impresorasSerializers, dispositivosSerializers, modelosSerializers, marcasSerializers, informacionSerializers, ubicacionesSerializers, usuariosSerializers, departamentoSerializers, empresasSerializers
 import django_filters.rest_framework 
 
 class equiposViewSet(viewsets.ModelViewSet):
@@ -10,6 +10,16 @@ class equiposViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend]
     search_fields = ['serial','serial_cargador','serial_unidad','dd','ram','tipo_ram','csb','tipo_equipo','antivirus','usuario_so','so']
     filterset_fields = ['usuariosforeignkey_id']
+    # http_method_names = ['patch','get']
+
+class equiposViewSetMin(viewsets.ModelViewSet):
+    queryset = equipos.objects.all()
+    permission_classes = [permissions.AllowAny]
+    serializer_class = equiposSerializersMin
+    filter_backends = [filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend]
+    search_fields = ['serial','serial_cargador','serial_unidad','csb','tipo_equipo','antivirus','usuario_so']
+    filterset_fields = ['usuariosforeignkey_id']
+    # http_method_names = ['patch','get']
 
 class impresorasViewSet(viewsets.ModelViewSet):
     queryset = impresoras.objects.all()

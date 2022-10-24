@@ -35,7 +35,8 @@ class informacionSerializers(serializers.ModelSerializer):
         fields = ('id','estatus','asignacion','observacion','ubicacionesforeignkey')
 
     def to_representation(self, value):
-        return {"id": value.id, "estatus": value.estatus, "asignacion": value.asignacion, "observacion": value.observacion, "ubicacion": value.ubicacionesforeignkey.nombre}
+        return {"id": value.id, "estatus": value.estatus, "asignacion": value.asignacion, "observacion": value.observacion, 
+        "ubicacionesforeignkey":{"id": value.ubicacionesforeignkey.id, "nombre": value.ubicacionesforeignkey.nombre}}
 
 class equiposSerializers(serializers.ModelSerializer):
     class Meta:
@@ -47,8 +48,57 @@ class equiposSerializers(serializers.ModelSerializer):
                 fields=['usuariosforeignkey']
             )
         ]
+        usuariosforeignkey = serializers.CharField(allow_null=True,source="usuariosforeignkey",required=False)
+        modelosforeignkey = serializers.CharField(allow_null=True,source="modelosforeignkey",required=False)
+    
     def to_representation(self, value):
-            return {'id': value.id_id,'serial': value.serial,'serial_cargador': value.serial_cargador,'serial_unidad': value.serial_unidad,'dd': value.dd,'ram': value.ram,'tipo_ram': value.tipo_ram,'csb': value.csb,'tipo_equipo': value.tipo_equipo,'antivirus': value.antivirus,'usuario_so': value.usuario_so,'so': value.so,'modelo': value.modelosforeignkey.nombre ,'usuario': { 'id': value.usuariosforeignkey.id, 'nombre': value.usuariosforeignkey.nombre}}
+        usuario = ''
+        usuario_id = ''
+        if(value.usuariosforeignkey is not None):
+            usuario = value.usuariosforeignkey.nombre
+            usuario_id = value.usuariosforeignkey.id
+            usuario_id_empresa = value.usuariosforeignkey.departamentosforeignkey.empresasforeignkey.id
+        else:
+            usuario = ''
+            usuario_id = ''
+            usuario_id_empresa = ''
+        # print(value.modelosforeignkey is not None if value.modelosforeignkey.nombre else 'nada')
+        return {'id': value.id_id,'serial': value.serial,'serial_cargador': value.serial_cargador,
+        'serial_unidad': value.serial_unidad,'dd': value.dd,'ram': value.ram,'tipo_ram': value.tipo_ram,
+        'csb': value.csb,'tipo_equipo': value.tipo_equipo,'antivirus': value.antivirus,'usuario_so': value.usuario_so,'so': value.so, 
+        'modelosforeignkey': value.modelosforeignkey.nombre, 'modelo_id': value.modelosforeignkey.id, 
+        'marca_id': value.modelosforeignkey.marcasforeignkey.id, 'marca': value.modelosforeignkey.marcasforeignkey.nombre,
+        'usuario' : {'id': usuario_id, 'nombre': usuario, 'empresa_id': usuario_id_empresa}}
+
+class equiposSerializersMin(serializers.ModelSerializer):
+    class Meta:
+        model = equipos
+        fields = ('id','serial','serial_cargador','serial_unidad','dd','ram','tipo_ram','csb','tipo_equipo','antivirus','usuario_so','so','modelosforeignkey','usuariosforeignkey')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=equipos.objects.all(),
+                fields=['usuariosforeignkey']
+            )
+        ]
+        usuariosforeignkey = serializers.CharField(allow_null=True,source="usuariosforeignkey",required=False)
+        modelosforeignkey = serializers.CharField(allow_null=True,source="modelosforeignkey",required=False)
+    
+    def to_representation(self, value):
+        usuario = ''
+        usuario_id = ''
+        if(value.usuariosforeignkey is not None):
+            usuario = value.usuariosforeignkey.nombre
+            usuario_id = value.usuariosforeignkey.id
+            usuario_id_empresa = value.usuariosforeignkey.departamentosforeignkey.empresasforeignkey.id
+        else:
+            usuario = ''
+            usuario_id = ''
+            usuario_id_empresa = ''
+        # print(value.modelosforeignkey is not None if value.modelosforeignkey.nombre else 'nada')
+        return {'id': value.id_id,'serial': value.serial,'serial_cargador': value.serial_cargador,
+        'serial_unidad': value.serial_unidad,'csb': value.csb,'tipo_equipo': value.tipo_equipo,
+        'antivirus': value.antivirus,'usuario_so': value.usuario_so,
+        'usuario' : {'id': usuario_id, 'nombre': usuario, 'empresa_id': usuario_id_empresa}}
 
 class ubicacionesSerializers(serializers.ModelSerializer):
     class Meta:

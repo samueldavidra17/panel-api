@@ -1,5 +1,5 @@
 from rest_framework import routers
-from .api import dispositivosViewSet, empresasViewSet, departamentosViewSet, usuariosViewSet, ubicacionesViewSet, informacionViewSet, marcasViewSet, modelosViewSet, impresorasViewSet, equiposViewSet
+from .api import dispositivosViewSet, empresasViewSet, equiposViewSetMin, departamentosViewSet, usuariosViewSet, ubicacionesViewSet, informacionViewSet, marcasViewSet, modelosViewSet, impresorasViewSet, equiposViewSet
 
 router = routers.DefaultRouter()
 
@@ -14,5 +14,5 @@ router.register('api/modelos', modelosViewSet , 'modelos')
 router.register('api/dispositivos', dispositivosViewSet , 'dispositivos')
 router.register('api/Impresoras', impresorasViewSet , 'Impresoras')
 router.register('api/equipos', equiposViewSet, 'equipos')
-
+router.register('api/equipos/', equiposViewSetMin, 'equipos')
 urlpatterns = router.urls
