@@ -5,6 +5,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from .models import departamentos_empresas, empresas, marcas, tipos_equipos, tipos_equipos_marcas, departamentos, ubicaciones, usuarios, informacion, modelos, equipos, impresoras, dispositivos
 from django.http import HttpResponse
+# from .json import
 
 # def my_custom_error_view(request):    
 #     return HttpResponse("error message", status_code=404)
@@ -19,11 +20,38 @@ class dispositivosSerializers(serializers.ModelSerializer):
         model = dispositivos
         fields = ('id','serial','informacion','modelos','usuarios')
 
-class modelosSerializers(serializers.ModelSerializer):
+class tipos_equiposSerializers(serializers.ModelSerializer):
+    marcas = serializers.PrimaryKeyRelatedField(queryset=marcas.objects.all(), many=True)
     class Meta:
-        model = modelos
+        model = tipos_equipos
+        fields = ('id','nombre','marcas')
+
+class tipos_equipos_marcasSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = tipos_equipos_marcas
+        fields = ('id','marcas')
+
+class marcasSerializers(serializers.ModelSerializer):
+    tiposEquiposMarcas = serializers.PrimaryKeyRelatedField(queryset=tipos_equipos.objects.all(), many=True)
+    class Meta:
+        model = marcas
         fields = ('id','nombre','tiposEquiposMarcas')
 
+class modelosSerializers(serializers.ModelSerializer):
+    tipoEquipos = serializers.PrimaryKeyRelatedField(queryset=tipos_equipos.objects.all(), many=False)
+    marca = serializers.PrimaryKeyRelatedField(queryset=marcas.objects.all(), many=False)
+    nombre = serializers.ListField(child=serializers.CharField())
+    class Meta:
+        model = modelos
+        fields = ('id','nombre','tipoEquipos', 'marca')
+
+    def create(self, validated_data):
+        data = []
+        tiposEquiposMarcas = tipos_equipos_marcas.objects.get(marcas=validated_data['marca'], tiposEquipos=validated_data['tipoEquipos'])
+        for x in validated_data['nombre']:
+            modelo = modelos.objects.create(nombre=x, tiposEquiposMarcas=tiposEquiposMarcas)
+            data.append(modelo)
+        return data[len(data)-1]
     def to_representation(self, value):
         return {"id": value.id, "nombre": value.nombre, "marca": value.tiposEquiposMarcas.marcas.nombre}
 
@@ -92,7 +120,30 @@ class equiposSerializers(serializers.ModelSerializer):
                 'empresa_id': usuario_id_empresa
             }
         else:
-            return value
+            usuario = ''
+            usuario_id = ''
+            usuario_id_empresa = ''
+            if(value["usuarios_id__nombre"] is not None):
+                usuario = value["usuarios_id__nombre"]
+                usuario_id = value["usuarios_id"]
+                usuario_id_empresa = value["empresas_id__id"]
+            else:
+                usuario = 'Disponible'
+                usuario_id = ''
+                usuario_id_empresa = ''
+            return {
+            "id": value["id"],
+            "empresa": value["empresas_id__nombre"],
+            "ubicacion": value["id__ubicaciones__nombre"],
+            "serial": value["serial"], 
+            "csb": value["csb"], 
+            "tipo_equipo": value["tipo_equipo"], 
+            "usuario_so": value["usuario_so"], 
+            "modelo": value["modelos_id__nombre"], 
+            "marca": value["modelos_id__tiposEquiposMarcas_id__marcas_id__nombre"], 
+            "usuario": usuario, 
+            "empresa_id": usuario_id_empresa
+        }
 
 class equiposSerializersMin(serializers.ModelSerializer):
     class Meta:
@@ -174,23 +225,6 @@ class usuariosSerializers(serializers.ModelSerializer):
         # equiposUs=equiposSerializers(many=True,required=False).data
         return {"id": value.id, "cargo": value.cargo, "nombre": value.nombre, "departamento": value.departamentosEmpresas.departamentos.nombre, "departamentoId": value.departamentosEmpresas.departamentos.id, "empresaId": value.departamentosEmpresas.empresas.id, "empresa": value.departamentosEmpresas.empresas.nombre}
 
-
-class tipos_equiposSerializers(serializers.ModelSerializer):
-    marcas = serializers.PrimaryKeyRelatedField(queryset=marcas.objects.all(), many=True)
-    class Meta:
-        model = tipos_equipos
-        fields = ('id','nombre','marcas')
-
-class tipos_equipos_marcasSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = tipos_equipos_marcas
-        fields = ('id','marcas')
-
-class marcasSerializers(serializers.ModelSerializer):
-    tiposEquiposMarcas = serializers.PrimaryKeyRelatedField(queryset=tipos_equipos.objects.all(), many=True)
-    class Meta:
-        model = marcas
-        fields = ('id','nombre','tiposEquiposMarcas')
 
 # class departamentosSerializers(serializers.ModelSerializer):
 #     class Meta:
