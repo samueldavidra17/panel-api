@@ -100,20 +100,20 @@ class dispositivosViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter]
     search_fields = []
 
+
 class modelosViewSet(viewsets.ModelViewSet):
     queryset = modelos.objects.all()
     serializer_class = modelosSerializers
     permission_classes = [permissions.AllowAny] 
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
-    filterset_fields = ['id','nombre','tiposEquiposMarcas_id']
+    filterset_fields = ['id','nombre', 'tiposEquiposMarcas_id__tiposEquipos_id', 'tiposEquiposMarcas_id__marcas_id']
     
 
 class marcasViewSet(viewsets.ModelViewSet):
     queryset = marcas.objects.all()
-    permission_classes = [permissions.AllowAny] 
     serializer_class = marcasSerializers
-    filter_backends = [filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend]
-    search_fields = []
+    permission_classes = [permissions.AllowAny] 
+    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     filterset_fields = ['tiposEquiposMarcas']
 
 class informacionViewSet(viewsets.ModelViewSet):
@@ -151,8 +151,3 @@ class empresasViewSet(viewsets.ModelViewSet):
     serializer_class = empresasSerializers    
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     filterset_fields = ['id']
-
-# class departamentosViewSet(viewsets.ModelViewSet):
-#     queryset = departamentos.objects.all()
-#     permission_classes = [permissions.AllowAny] 
-#     serializer_class = departamentosSerializers

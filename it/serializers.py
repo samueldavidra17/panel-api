@@ -21,10 +21,9 @@ class dispositivosSerializers(serializers.ModelSerializer):
         fields = ('id','serial','informacion','modelos','usuarios')
 
 class tipos_equiposSerializers(serializers.ModelSerializer):
-    marcas = serializers.PrimaryKeyRelatedField(queryset=marcas.objects.all(), many=True)
     class Meta:
         model = tipos_equipos
-        fields = ('id','nombre','marcas')
+        fields = ('id','nombre')
 
 class tipos_equipos_marcasSerializers(serializers.ModelSerializer):
     class Meta:
@@ -32,28 +31,43 @@ class tipos_equipos_marcasSerializers(serializers.ModelSerializer):
         fields = ('id','marcas')
 
 class marcasSerializers(serializers.ModelSerializer):
-    tiposEquiposMarcas = serializers.PrimaryKeyRelatedField(queryset=tipos_equipos.objects.all(), many=True)
+    tipoEquipos = serializers.PrimaryKeyRelatedField(queryset=tipos_equipos.objects.all(), many=False)
+    modelos = serializers.ListField(child=serializers.CharField())
+
     class Meta:
         model = marcas
-        fields = ('id','nombre','tiposEquiposMarcas')
+        fields = ('id','nombre','tipoEquipos', 'modelos')
+    
+    def create(self, validated_data):
+        marca = marcas.objects.create(nombre=validated_data['nombre'])
+        tiposEquiposMarcas = tipos_equipos_marcas.objects.create(marcas=marca, tiposEquipos=validated_data['tipoEquipos'])
+        if(len(validated_data['modelos']) > 0):
+            for x in validated_data['modelos']:
+                modelos.objects.create(nombre=x, tiposEquiposMarcas=tiposEquiposMarcas)
+        return marca
+
+    def update(self, instance, validated_data):
+        instance.nombre = validated_data['nombre']
+        if(len(validated_data['modelos']) > 0):
+            tiposEquiposMarcas = tipos_equipos_marcas.objects.get(tiposEquipos=validated_data['tipoEquipos'], marcas=instance.id)
+            for x in validated_data['modelos']:
+                modelos.objects.create(nombre=x, tiposEquiposMarcas=tiposEquiposMarcas)
+
+        instance.save()
+        return instance
+
+    def to_representation(self, value):
+        return {"id": value.id, "nombre": value.nombre}
 
 class modelosSerializers(serializers.ModelSerializer):
-    tipoEquipos = serializers.PrimaryKeyRelatedField(queryset=tipos_equipos.objects.all(), many=False)
-    marca = serializers.PrimaryKeyRelatedField(queryset=marcas.objects.all(), many=False)
-    nombre = serializers.ListField(child=serializers.CharField())
+    tipoEquiposMarca = serializers.PrimaryKeyRelatedField(queryset=tipos_equipos_marcas.objects.all(), many=False)
+
     class Meta:
         model = modelos
-        fields = ('id','nombre','tipoEquipos', 'marca')
+        fields = ('id','nombre','tipoEquiposMarca')
 
-    def create(self, validated_data):
-        data = []
-        tiposEquiposMarcas = tipos_equipos_marcas.objects.get(marcas=validated_data['marca'], tiposEquipos=validated_data['tipoEquipos'])
-        for x in validated_data['nombre']:
-            modelo = modelos.objects.create(nombre=x, tiposEquiposMarcas=tiposEquiposMarcas)
-            data.append(modelo)
-        return data[len(data)-1]
     def to_representation(self, value):
-        return {"id": value.id, "nombre": value.nombre, "marca": value.tiposEquiposMarcas.marcas.nombre}
+        return {"id": value.id, "nombre": value.nombre, "tipoEquiposMarca": value.tiposEquiposMarcas.id}
 
 class informacionSerializers(serializers.ModelSerializer):
     class Meta:
@@ -193,10 +207,11 @@ class ubicacionesSerializers(serializers.ModelSerializer):
 
 class empresasSerializers(serializers.ModelSerializer):
     empresasDepartamentos = serializers.PrimaryKeyRelatedField(queryset=departamentos.objects.all(), many=True)
+
     class Meta:
         model = empresas
         fields = ('id','nombre', 'empresasDepartamentos')
-
+    
 class departamentoSerializers(serializers.ModelSerializer):
     empresas = serializers.PrimaryKeyRelatedField(queryset=empresas.objects.all(), many=True)
     class Meta:
@@ -219,6 +234,13 @@ class usuariosSerializers(serializers.ModelSerializer):
             return usuarios.objects.create(**usuario)
         except departamentos_empresas.DoesNotExist:
             return HttpResponse("error message", status_code=500)
+
+    def update(self, instance, validated_data):
+        instance.nombre = validated_data['nombre']
+        instance.cargo = validated_data['cargo']
+        instance.departamentosEmpresas = departamentos_empresas.objects.get(departamentos=validated_data['departamento'], empresas=validated_data['empresa'])
+        instance.save()
+        return instance;
 
     def to_representation(self, value):
         # if(equipos.value.usuarios):
