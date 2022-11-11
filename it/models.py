@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import Value
 from django.db.models.functions import Concat
+from simple_history.models import HistoricalRecords
 
 # Create your models here.
 
@@ -43,9 +44,9 @@ class usuarios(models.Model):
     departamentosEmpresas = models.ForeignKey(departamentos_empresas, on_delete=models.CASCADE, related_name="departamentoEmpresaUs", null=False)
 
 class informacion(models.Model):
-    estatus = models.CharField(max_length=45)
-    asignacion = models.CharField(max_length=45)
-    observacion = models.TextField()
+    estatus = models.CharField(max_length=45, default="OPERATIVA")
+    asignacion = models.CharField(max_length=45, default="POS ASIGNAR")
+    observacion = models.TextField(default="S/N")
     ubicaciones = models.ForeignKey(ubicaciones, on_delete=models.CASCADE, related_name="ubicacionesUser", default=1)
     # usuarios = models.ForeignKey(usuarios, on_delete=models.CASCADE, related_name="informacion_us", null="True")
 
@@ -55,20 +56,21 @@ class modelos(models.Model):
 
 class equipos(models.Model):
     id = models.OneToOneField(informacion, primary_key=True, unique=True, on_delete=models.CASCADE, related_name="informacion_eq")
-    empresas = models.ForeignKey(empresas, on_delete=models.CASCADE, related_name="empresasEq", null="True")
-    tipo_equipo = models.CharField(max_length=45)
+    empresas = models.ForeignKey(empresas, on_delete=models.CASCADE, related_name="empresasEq", null=False, default=1)
+    # tipo_equipo = models.CharField(max_length=45)
     modelos = models.ForeignKey(modelos, on_delete=models.CASCADE, related_name="modelosEq", null=False)
-    serial = models.CharField(max_length=45)
-    serial_unidad = models.CharField(max_length=45)
-    serial_cargador = models.CharField(max_length=45)
-    csb= models.CharField(max_length=45)
-    dd = models.CharField(max_length=45)
-    ram = models.CharField(max_length=45)
-    tipo_ram = models.CharField(max_length=45)
-    antivirus = models.CharField(max_length=45)
-    so = models.CharField(max_length=45)
-    usuario_so = models.CharField(max_length=45)
+    serial = models.CharField(max_length=45, default="S/N")
+    serial_unidad = models.CharField(max_length=45, default="S/N")
+    serial_cargador = models.CharField(max_length=45, default="S/N")
+    csb= models.CharField(max_length=45, default="S/N")
+    dd = models.CharField(max_length=45, default="S/N")
+    ram = models.CharField(max_length=45, default="S/N")
+    tipo_ram = models.CharField(max_length=45, default="S/N")
+    antivirus = models.CharField(max_length=45, default="S/N")
+    so = models.CharField(max_length=45, default="S/N")
+    usuario_so = models.CharField(max_length=45, default="S/N")
     usuarios = models.ForeignKey(usuarios, on_delete=models.CASCADE, related_name="equiposUs", null=True)
+    history = HistoricalRecords()
 
     # def __str__(self):
     #     return self.usuarios
