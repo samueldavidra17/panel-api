@@ -63,22 +63,14 @@ class marcasSerializers(serializers.ModelSerializer):
 
 
 class modelosSerializers(serializers.ModelSerializer):
-    tipoEquipos = serializers.PrimaryKeyRelatedField(queryset=tipos_equipos.objects.all(), many=False)
-    marca = serializers.PrimaryKeyRelatedField(queryset=marcas.objects.all(), many=False)
-    nombre = serializers.ListField(child=serializers.CharField())
+    tiposEquiposMarcas = serializers.PrimaryKeyRelatedField(queryset=tipos_equipos_marcas.objects.all(), many=False)
+    
     class Meta:
         model = modelos
-        fields = ('id','nombre','tipoEquipos', 'marca')
+        fields = ('id','nombre','tiposEquiposMarcas')
 
-    def create(self, validated_data):
-        data = []
-        tiposEquiposMarcas = tipos_equipos_marcas.objects.get(marcas=validated_data['marca'], tiposEquipos=validated_data['tipoEquipos'])
-        for x in validated_data['nombre']:
-            modelo = modelos.objects.create(nombre=x, tiposEquiposMarcas=tiposEquiposMarcas)
-            data.append(modelo)
-        return data[len(data)-1]
     def to_representation(self, value):
-        return {"id": value.id, "nombre": value.nombre, "marca": value.tiposEquiposMarcas.marcas.nombre}
+        return {"id": value.id, "nombre": value.nombre, "tiposEquiposMarcas": value.tiposEquiposMarcas.id}
 
 class informacionSerializers(serializers.ModelSerializer):
     class Meta:
@@ -116,16 +108,24 @@ class HistoricalRecordField(serializers.ModelSerializer):#.ListField):
 
 class equiposSerializers(serializers.ModelSerializer):
     # history = HistoricalRecordField(read_only=True)
+
     class Meta:
         model = equipos
-        fields = ('serial','serial_cargador','serial_unidad','dd','ram','tipo_ram','csb','antivirus','usuario_so','so','modelos','usuarios','empresas', 'history')
+        fields = ('id','serial','serial_cargador','serial_unidad','dd','ram','tipo_ram','csb','antivirus','usuario_so','so','modelos','usuarios','empresas', 'history')
         read_only_fields = ('history',)
-        validators = [
-            UniqueTogetherValidator(
-                queryset=equipos.objects.all(),
-                fields=['usuarios']
-            )
-        ]
+        # query = equipos.objects.all().values('id__asignacion')
+        # for i in query:
+        #     valor = i['id__asignacion']
+        #     if(valor == "PRESTAMO"):
+        #     else:
+        #         print('hola')
+        # validators = [
+        #     UniqueTogetherValidator(
+        #         queryset=equipos.objects.all(),
+        #         fields=['usuarios']
+        #     )
+        # ]
+
         usuarios = serializers.CharField(allow_null=True,source="usuarios",required=False)
         modelos = serializers.CharField(allow_null=True,source="modelos",required=False)
     history = serializers.SerializerMethodField()
@@ -135,10 +135,22 @@ class equiposSerializers(serializers.ModelSerializer):
     #     h = obj.history.all()
     #     return h
 
+    def validate_unique(self,exclude=None):
+        qs = equipos.objects.filter(self)
+        print(qs)
+        # if(value["id"].asignacion != "PRESTAMO"):
+        #     print('hola')
+            # UniqueTogetherValidator(
+            #     queryset=equipos.objects.all(),
+            #     fields=['usuarios']
+            # )
+
+        # return value 
+
     def create(self, validated_data):
         info = informacion.objects.create()
         return equipos.objects.create(id=info, **validated_data)
-
+        
     # def update(self, instance, validated_data):
     #     instance.serial = validated_data['serial']
     #     instance.tipos_equipo = validated_data['tipos_equipo']
@@ -150,10 +162,12 @@ class equiposSerializers(serializers.ModelSerializer):
     #     return instance
 
     def to_representation(self, value):
+        # if(value.id.asignacion == 'PRESTAMO'):
+        #     print('hola')
         if(type(value) != type({})):
             model = value.history.__dict__['model']
             # print(value.history.__dict__['instance'].usuarios.nombre)
-            fields = ['usuarios']
+            fields = ['usuarios_id']
             serializer = HistoricalRecordField(model, value.history.using('it_db'), fields=fields, many=True)
             serializer.is_valid()
             usuario = ''

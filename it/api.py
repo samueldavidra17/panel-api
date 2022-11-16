@@ -89,6 +89,9 @@ class equiposViewSet(viewsets.ModelViewSet, GenericAPIView):
         queryset = equipos.objects.all()
         return queryset
 
+    # def put(self, request, *args, **kwargs):
+    #     return self.update(request, *args, **kwargs)
+
     def list(self, request):
         # print(self.get_queryset)
         queryset = self.get_queryset().values('id','empresas_id__nombre','id__ubicaciones__nombre',
@@ -187,10 +190,19 @@ class departamentosViewSet(viewsets.ModelViewSet):
 
 class empresasViewSet(viewsets.ModelViewSet):
     queryset = empresas.objects.all()
-    permission_classes = [permissions.AllowAny] 
+    # authentication_classes = [SessionAuthentication, BasicAuthentication]
+    # permission_classes = [IsAuthenticated] 
+    permission_classes = [permissions.AllowAny]
     serializer_class = empresasSerializers    
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     filterset_fields = ['id']
+
+    # def get(self, request, format=None):
+    #     content = {
+    #         'user': str(request.user),  # `django.contrib.auth.User` instance.
+    #         'auth': str(request.auth),  # None
+    #     }
+    #     return Response(content)
 
 # class departamentosViewSet(viewsets.ModelViewSet):
 #     queryset = departamentos.objects.all()
