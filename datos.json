@@ -1,0 +1,52 @@
+{
+    "asignaciones": [
+        "DAÑADA",
+        "ASIGNADA",
+        "DESINCORPORADO",
+        "POR ASIGNAR",
+        "EN PRESTAMO",
+        "DESCONTINUADA",
+        "ASIGNACION ALTERNA",
+        "ROBADA"
+    ],
+    "estatus": [
+        "INOPERATIVA",
+        "OPERATIVA",
+        "DESINCORPORADO",
+        "DAÑADA",
+        "ROBADA",
+        "DONADA"
+    ],
+    "tiposRam": [
+        "DDR",
+        "DDR3L",
+        "DDR3",
+        "DDR2",
+        "DDR4",
+        "FIJA",
+        "S/N"
+    ],
+    "so": [
+        "MICROSOFT WINDOWS XP",
+        "MICROSOFT WINDOWS 7",
+        "MICROSOFT WINDOWS 8",
+        "MICROSOFT WINDOWS 8.1",
+        "MICROSOFT WINDOWS 8.1 MINIOS",
+        "MICROSOFT WINDOWS 10",
+        "MICROSOFT WINDOWS 10 HOME",
+        "MICROSOFT WINDOWS 10 LITE",
+        "MICROSOFT WINDOWS 10 PRO",
+        "MICROSOFT WINDOWS 10 PRO MINI",
+        "MICROSOFT WINDOWS 10 PRO ORIGINAL",
+        "MICROSOFT WINDOWS 10 LTSB",
+        "MICROSOFT WINDOWS 10 MINIOS",
+        "MICROSOFT WINDOWS SERVER 2003",
+        "MICROSOFT WINDOWS SERVER 2008 R2 (64BIT)",
+        "MICROSOFT WINDOWS SERVER 2012 (64BIT)",
+        "MICROSOFT WINDOWS SERVER 2012 R2 (64BIT)",
+        "MICROSOFT WINDOWS SERVER 2018",
+        "DEBIAN",
+        "POR CONFIGURAR",
+        "S/N"
+    ]
+}

@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import Value
 from django.db.models.functions import Concat
+from simple_history.models import HistoricalRecords
 
 # Create your models here.
 
@@ -54,21 +55,23 @@ class modelos(models.Model):
     tiposEquiposMarcas = models.ForeignKey(tipos_equipos_marcas, on_delete=models.CASCADE, related_name="tiposEquiposMarcasId", null="True")
 
 class equipos(models.Model):
-    id = models.OneToOneField(informacion, primary_key=True, unique=True, on_delete=models.CASCADE, related_name="informacion_eq")
-    empresas = models.ForeignKey(empresas, on_delete=models.CASCADE, related_name="empresasEq", null="True")
-    tipo_equipo = models.CharField(max_length=45)
-    modelos = models.ForeignKey(modelos, on_delete=models.CASCADE, related_name="modelosEq", null=False)
-    serial = models.CharField(max_length=45)
-    serial_unidad = models.CharField(max_length=45)
-    serial_cargador = models.CharField(max_length=45)
-    csb= models.CharField(max_length=45)
-    dd = models.CharField(max_length=45)
-    ram = models.CharField(max_length=45)
-    tipo_ram = models.CharField(max_length=45)
-    antivirus = models.CharField(max_length=45)
-    so = models.CharField(max_length=45)
-    usuario_so = models.CharField(max_length=45)
-    usuarios = models.ForeignKey(usuarios, on_delete=models.CASCADE, related_name="equiposUs", null=True)
+    id = models.OneToOneField(informacion, primary_key=True, unique=True, on_delete=models.CASCADE, related_name="informacion_eq", blank=True)
+    empresas = models.ForeignKey(empresas, on_delete=models.CASCADE, related_name="empresasEq", null=True, default=1, blank=True)
+    # tipo_equipo = models.CharField(max_length=45, blank=True)
+    modelos = models.ForeignKey(modelos, on_delete=models.CASCADE, related_name="modelosEq", null=False, blank=True)
+    serial = models.CharField(max_length=45, default="S/N", blank=True)
+    serial_unidad = models.CharField(max_length=45, default="S/N", blank=True)
+    serial_cargador = models.CharField(max_length=45, default="S/N", blank=True)
+    csb= models.CharField(max_length=45, default="S/N", blank=True)
+    dd = models.CharField(max_length=45, default="S/N", blank=True)
+    ram = models.CharField(max_length=45, default="S/N", blank=True)
+    tipo_ram = models.CharField(max_length=45, default="S/N", blank=True)
+    antivirus = models.CharField(max_length=45, default="S/N", blank=True)
+    so = models.CharField(max_length=45, default="S/N", blank=True)
+    usuario_so = models.CharField(max_length=45, default="S/N", blank=True)
+    usuarios = models.ForeignKey(usuarios, on_delete=models.CASCADE, related_name="equiposUs", null=True, blank=True)
+    history = HistoricalRecords()
+    # historyUser = HistoricalRecords(excluded_fields=['empresas, modelos, serial, serial_unidad, serial_cargador, csb, dd, ram, tipo_ram, antivirus, so, usuarios_so, history'])
 
     # def __str__(self):
     #     return self.usuarios
@@ -80,15 +83,27 @@ class equipos(models.Model):
     #     return super(equipos, self).save(*args, **kwargs)
 
 class impresoras(models.Model):
-    codigo_inventario = models.CharField(max_length=45)
+    TIPOS_IMPRESIONES = (
+        ('NO APLICA','No aplica'),
+        ('CINTA','Cinta'),
+        ('TONER','Toner'),
+        ('RIBON','Ribon'),
+        ('TINTA','Tinta')
+    )
+    TIPOS_CONEXION = (
+        ('NO APLICA','No aplica'),
+        ('RED','Red'),
+        ('USB','Usb'),
+        ('COMPARTIDA','Compartida')
+    )
+    tipo_impresion = models.CharField(max_length=45, choices=TIPOS_IMPRESIONES)
     serial = models.CharField(max_length=45)
     csb = models.CharField(max_length=45)
-    cbc = models.CharField(max_length=45)
-    tipoImpresion = models.CharField(max_length=45)
-    tipo_conexion = models.CharField(max_length=45)
+    toner = models.CharField(max_length=45)
+    tipo_conexion = models.CharField(max_length=45, choices=TIPOS_CONEXION, default="No aplica")
     ip = models.CharField(max_length=45)
-    propiedad = models.CharField(max_length=45)
-    informacion = models.ForeignKey(informacion, on_delete=models.CASCADE, related_name="informacionIm", null="True")
+    departamento = models.ForeignKey(departamentos, on_delete=models.CASCADE, related_name="departamentosImpresora", null=False)
+    id = models.OneToOneField(informacion, primary_key=True, unique=True, on_delete=models.CASCADE, related_name="informacion_imp", blank=True)
     modelos = models.ForeignKey(modelos, on_delete=models.CASCADE, related_name="modelosImp", null="True")
 
 class dispositivos(models.Model):
