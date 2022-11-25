@@ -57,7 +57,6 @@ class modelos(models.Model):
 class equipos(models.Model):
     id = models.OneToOneField(informacion, primary_key=True, unique=True, on_delete=models.CASCADE, related_name="informacion_eq", blank=True)
     empresas = models.ForeignKey(empresas, on_delete=models.CASCADE, related_name="empresasEq", null=True, default=1, blank=True)
-    # tipo_equipo = models.CharField(max_length=45, blank=True)
     modelos = models.ForeignKey(modelos, on_delete=models.CASCADE, related_name="modelosEq", null=False, blank=True)
     serial = models.CharField(max_length=45, default="S/N", blank=True)
     serial_unidad = models.CharField(max_length=45, default="S/N", blank=True)
@@ -68,7 +67,7 @@ class equipos(models.Model):
     tipo_ram = models.CharField(max_length=45, default="S/N", blank=True)
     antivirus = models.CharField(max_length=45, default="S/N", blank=True)
     so = models.CharField(max_length=45, default="S/N", blank=True)
-    usuario_so = models.CharField(max_length=45, default="S/N", blank=True)
+    usuario_so = models.CharField(max_length=45, default="S/N", unique=True, blank=True)
     usuarios = models.ForeignKey(usuarios, on_delete=models.CASCADE, related_name="equiposUs", null=True, blank=True)
     history = HistoricalRecords()
     # historyUser = HistoricalRecords(excluded_fields=['empresas, modelos, serial, serial_unidad, serial_cargador, csb, dd, ram, tipo_ram, antivirus, so, usuarios_so, history'])
@@ -107,11 +106,8 @@ class impresoras(models.Model):
     modelos = models.ForeignKey(modelos, on_delete=models.CASCADE, related_name="modelosImp", null="True")
 
 class dispositivos(models.Model):
-    serial = models.CharField(max_length=45)
+    serial = models.CharField(max_length=45, default="S/N")
+    csb = models.CharField(max_length=45, default="S/N")
     modelos = models.ForeignKey(modelos, on_delete=models.CASCADE, related_name="modelosDis", null="True")
-    informacion = models.ForeignKey(informacion, on_delete=models.CASCADE, related_name="informacionDis", null="True")
-    usuarios = models.ForeignKey(usuarios, on_delete=models.CASCADE, related_name="dispositivosUs", null="True")
-
-# class capacidad_dispositivos(models.Model):
-#     capacidad = models.IntegerField()
-#     dispositivosforeignkey = models.ForeignKey(dispositivos, on_delete=models.CASCADE, related_name="dispositivos_cap", null="True")
+    asignado = models.OneToOneField(equipos, to_field='usuario_so', on_delete=models.CASCADE, related_name="equiposDis", null="True")
+    

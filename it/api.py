@@ -59,7 +59,7 @@ class StandardResultsSetPagination(PageNumberPagination):
 # using('json_db')
 # using('json_db')
 class TextComboxApi(ObjectMultipleModelAPIViewSet):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     def get_querylist(self):
         querylist = (
             {'queryset': asignaciones.objects.all(), 'serializer_class': asignacionesMinSerializers},
@@ -71,46 +71,46 @@ class TextComboxApi(ObjectMultipleModelAPIViewSet):
 
 class asignacionesViewSet(viewsets.ModelViewSet):
     queryset = asignaciones.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     serializer_class = asignacionesSerializers
 
 class tiposRamViewSet(viewsets.ModelViewSet):
     queryset = tiposRam.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     serializer_class = tiposRamSerializers
 
 class estatusViewSet(viewsets.ModelViewSet):
     queryset = estatus.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     serializer_class = estatusSerializers
 
 class soViewSet(viewsets.ModelViewSet):
     queryset = so.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     serializer_class = soSerializers
 
 class tipos_equiposViewSet(viewsets.ModelViewSet):
     queryset = tipos_equipos.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     serializer_class = tipos_equiposSerializers
     filter_backends = [filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend]
     filterset_fields = ['marcas']
 
 class tipos_equipos_marcasViewSet(viewsets.ModelViewSet):
     queryset = tipos_equipos_marcas.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     serializer_class = tipos_equipos_marcasSerializers
     filter_backends = [filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend]
     filterset_fields = ['marcas_id__nombre','tiposEquipos_id__nombre']
 
 class historialEquiposViewSet(viewsets.ModelViewSet):
     queryset = equipos.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     serializer_class = historialSerializers
 
 class equiposViewSet(viewsets.ModelViewSet, GenericAPIView):
     # queryset = equipos.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     serializer_class = equiposSerializers
     # pagination_class = StandardResultsSetPagination
     filter_backends = [filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend]
@@ -174,14 +174,14 @@ class equiposViewSet(viewsets.ModelViewSet, GenericAPIView):
 
 class impresorasViewSet(viewsets.ModelViewSet):
     queryset = impresoras.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     serializer_class = impresorasSerializers
     filter_backends = [filters.SearchFilter]
     search_fields = []
 
 class dispositivosViewSet(viewsets.ModelViewSet):
     queryset = dispositivos.objects.all()
-    permission_classes = [permissions.IsAuthenticated] 
+    permission_classes = [permissions.AllowAny] 
     serializer_class = dispositivosSerializers
     filter_backends = [filters.SearchFilter]
     search_fields = []
@@ -190,14 +190,14 @@ class dispositivosViewSet(viewsets.ModelViewSet):
 class modelosViewSet(viewsets.ModelViewSet):
     queryset = modelos.objects.all()
     serializer_class = modelosSerializers
-    permission_classes = [permissions.IsAuthenticated] 
+    permission_classes = [permissions.AllowAny] 
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     filterset_fields = ['id','nombre','tiposEquiposMarcas_id__tiposEquipos_id', 'tiposEquiposMarcas_id__marcas_id']
     
 
 class marcasViewSet(viewsets.ModelViewSet):
     queryset = marcas.objects.all()
-    permission_classes = [permissions.IsAuthenticated] 
+    permission_classes = [permissions.AllowAny] 
     serializer_class = marcasSerializers
     permission_classes = [permissions.AllowAny] 
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
@@ -205,28 +205,28 @@ class marcasViewSet(viewsets.ModelViewSet):
 
 class informacionViewSet(viewsets.ModelViewSet):
     queryset = informacion.objects.all()
-    permission_classes = [permissions.IsAuthenticated] 
+    permission_classes = [permissions.AllowAny] 
     serializer_class = informacionSerializers
     filter_backends = [filters.SearchFilter]
     search_fields = ['asignacion']
 
 class ubicacionesViewSet(viewsets.ModelViewSet):
     queryset = ubicaciones.objects.all()#using('it_db')
-    permission_classes = [permissions.IsAuthenticated] 
+    permission_classes = [permissions.AllowAny] 
     serializer_class = ubicacionesSerializers
     # filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     # filterset_fields = ['empresasforeingkey_id']
 
 class usuariosViewSet(viewsets.ModelViewSet):
     queryset = usuarios.objects.all()
-    permission_classes = [permissions.IsAuthenticated] 
+    permission_classes = [permissions.AllowAny] 
     serializer_class = usuariosSerializers
     filter_backends = [filters.SearchFilter]
     search_fields = ['nombre']
 
 class departamentosViewSet(viewsets.ModelViewSet):
     queryset = departamentos.objects.all()
-    permission_classes = [permissions.IsAuthenticated] 
+    permission_classes = [permissions.AllowAny] 
     serializer_class = departamentoSerializers
     filter_backends = [filters.SearchFilter,django_filters.rest_framework.DjangoFilterBackend]
     search_fields = []
@@ -235,8 +235,8 @@ class departamentosViewSet(viewsets.ModelViewSet):
 class empresasViewSet(viewsets.ModelViewSet):
     queryset = empresas.objects.all()
     # authentication_classes = [SessionAuthentication, BasicAuthentication]
-    # permission_classes = [IsAuthenticated] 
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [AllowAny] 
+    permission_classes = [permissions.AllowAny]
     serializer_class = empresasSerializers    
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     filterset_fields = ['id']

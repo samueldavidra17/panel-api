@@ -61,11 +61,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-        'knox.auth.TokenAuthentication',
-        # 'rest_framework.authentication.TokenAuthentication' 
-    ],
+    # 'DEFAULT_AUTHENTICATION_CLASSES': [
+    #     'rest_framework.authentication.SessionAuthentication',
+    #     'knox.auth.TokenAuthentication',
+    #     # 'rest_framework.authentication.TokenAuthentication' 
+    # ],
 }
 
 MIDDLEWARE = [
@@ -117,7 +117,7 @@ WSGI_APPLICATION = 'djangoapiconfig.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'equips_it',
+        'NAME': 'inventario_it',
         'USER': 'root',
         'PASSWORD': '',
         'HOST': '/var/run/mysql',

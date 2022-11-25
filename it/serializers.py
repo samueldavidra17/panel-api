@@ -35,15 +35,45 @@ class impresorasSerializers(serializers.ModelSerializer):
         model = impresoras
         fields = ('tipo_impresion','serial','csb','tipo_conexion','ip','departamento','toner','modelos')
 
-        def create(self, validated_data):
-            info = informacion.objects.create()
-            return impresoras.objects.create(id=info, **validated_data)
+    def create(self, validated_data):
+        info = informacion.objects.create()
+        return impresoras.objects.create(id=info, **validated_data)
+    
+    def to_representation(self, instance):
+        return {
+            "id": instance.id.id,
+            "serial": instance.serial,
+            "csb": instance.csb,
+            "departamento": instance.departamento.nombre,
+            "tipo_impresion": instance.tipo_impresion,
+            "tipo_conexion": instance.tipo_conexion,
+            "ip": instance.ip,
+            "tipo_impresora": instance.modelos.tiposEquiposMarcas.tiposEquipos.nombre,
+            "modelo": instance.modelos.nombre,
+            "marca": instance.modelos.tiposEquiposMarcas.marcas.nombre,
+            "ubicacion": instance.id.ubicaciones.nombre,
+            "estatus": instance.id.estatus,
+            "toner": instance.toner,
+        } 
 
 class dispositivosSerializers(serializers.ModelSerializer):
     class Meta:
         model = dispositivos
-        fields = ('id','serial','informacion','modelos','usuarios')
-
+        fields = ('serial','modelos','usuarios')
+    
+    def create(self, validated_data):
+        info = informacion.objects.create()
+        return dispositivos.objects.create(id=info, **validated_data)
+    
+    def to_representation(self, instance):
+        return {
+            "usuario": instance.usuarios.nombre if instance.usuarios is not None else "Sin asignar",
+            "departamento": instance.usuarios.departamentosEmpresas.departamentos.nombre if instance.usuarios is not None else "Sin asignar",
+            "serial": instance.serial,
+            "tipo_equipo": instance.modelos.tiposEquiposMarcas.tiposEquipos.nombre,
+            "marca": instance.modelos.tiposEquiposMarcas.marcas.nombre,
+            "modelo": instance.modelos.nombre
+        }
 class tipos_equiposSerializers(serializers.ModelSerializer):
     # marcas = serializers.PrimaryKeyRelatedField(queryset=marcas.objects.all(), many=True)
     class Meta:
