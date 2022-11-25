@@ -1,5 +1,7 @@
 from rest_framework import routers
-from .api import tipos_equiposViewSet, tipos_equipos_marcasViewSet, dispositivosViewSet, empresasViewSet, departamentosViewSet, usuariosViewSet, ubicacionesViewSet, informacionViewSet, marcasViewSet, modelosViewSet, impresorasViewSet, equiposViewSet, asignacionesViewSet, tiposRamViewSet, estatusViewSet, soViewSet, TextComboxApi
+from .api import tipos_equiposViewSet, tipos_equipos_marcasViewSet, dispositivosViewSet, empresasViewSet, departamentosViewSet, usuariosViewSet, ubicacionesViewSet, informacionViewSet, marcasViewSet, modelosViewSet, impresorasViewSet, equiposViewSet, asignacionesViewSet, tiposRamViewSet, estatusViewSet, soViewSet, TextComboxApi, historialEquiposViewSet, RegisterAPI, LoginAPI
+from knox import views as knox_views
+from django.urls import path
 
 router = routers.DefaultRouter()
 
@@ -17,6 +19,7 @@ router.register('api/modelos', modelosViewSet , 'modelos')
 router.register('api/dispositivos', dispositivosViewSet , 'dispositivos')
 router.register('api/Impresoras', impresorasViewSet , 'Impresoras')
 router.register('api/equipos', equiposViewSet, 'equipos')
+router.register('api/historialequipos', historialEquiposViewSet, 'historialEquipos')
 router.register('api/asignaciones', asignacionesViewSet, 'asignaciones')
 router.register('api/tiposram', tiposRamViewSet, 'tiposram')
 router.register('api/estatus', estatusViewSet, 'estatus')
@@ -27,4 +30,12 @@ router.register('api/combox', TextComboxApi, 'combox')
 # urlpatterns = [
 #     path('api/equipos/{pk}', equiposViewSet.as_view)
 # ]
-urlpatterns = router.urls
+
+urlpatterns = [
+    path('api/register/', RegisterAPI.as_view(), name='register'),
+    path('api/login/', LoginAPI.as_view(), name='login'),
+    path('api/logout/', knox_views.LogoutView.as_view(), name='logout'),
+    path('api/logoutall/', knox_views.LogoutAllView.as_view(), name='logoutall')
+]
+
+urlpatterns += router.urls

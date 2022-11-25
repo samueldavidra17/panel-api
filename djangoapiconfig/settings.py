@@ -50,16 +50,22 @@ INSTALLED_APPS = [
     'jSon.apps.JsonConfig',
     'drf_multiple_model',
     'django_filters',
-    'rest_framework'
+    'rest_framework',
+    'knox',
+    # 'rest_framework.authtoken',
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-    ]
+        'knox.auth.TokenAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication' 
+    ],
 }
 
 MIDDLEWARE = [
@@ -75,12 +81,12 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://172.17.245.60:3000",
+    "http://172.17.245.104:3000",
     "http://localhost:3000",
 ]
 
 CORS_ORIGIN_WHITELIST = [
-    "http://172.17.245.60:3000",
+    "http://172.17.245.104:3000",
     "http://localhost:3000",
 ]
 
@@ -110,31 +116,35 @@ WSGI_APPLICATION = 'djangoapiconfig.wsgi.application'
 
 DATABASES = {
     'default': {
-        # 'ENGINE': 'django.db.backends.mysql',
-        # 'NAME': 'inventario_it',
-        # 'USER': 'root',
-        # 'PASSWORD': '',
-        # 'HOST': '/var/run/mysql',
-        # 'PORT': ''
-    },
-    'auth_db': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    },
-    'it_db':{
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'inventario_it',
+        'NAME': 'equips_it',
         'USER': 'root',
         'PASSWORD': '',
         'HOST': '/var/run/mysql',
         'PORT': ''
-        # 'ENGINE': 'django.db.backends.sqlite3',
-        # 'NAME': BASE_DIR / 'it.sqlite3',
     },
-    'json_db': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'datos.sqlite3',
-    }
+    # 'auth_db': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # },
+    # 'knox_db': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'knox.sqlite3',
+    # },
+    # 'it_db':{
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'equipos_it',
+    #     'USER': 'root',
+    #     'PASSWORD': '',
+    #     'HOST': '/var/run/mysql',
+    #     'PORT': ''
+    #     # 'ENGINE': 'django.db.backends.sqlite3',
+    #     # 'NAME': BASE_DIR / 'it.sqlite3',
+    # },
+    # 'json_db': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'datos.sqlite3',
+    # }
 }
 
 
@@ -177,6 +187,6 @@ STATIC_URL = 'static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
-DATABASE_ROUTERS = ['routers.db_routers.AuthRouter','routers.db_routers.ItDb','routers.db_routers.Json']
+# DATABASE_ROUTERS = ['routers.db_routers.AuthRouter','routers.db_routers.ItDb','routers.db_routers.Json','routers.db_routers.knox']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

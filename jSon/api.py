@@ -4,7 +4,7 @@ from rest_framework import viewsets, permissions, filters, status
 from rest_framework.response import Response
 
 class asignacionesViewSet(viewsets.ModelViewSet):
-    queryset = asignaciones.objects.using('json_db')
+    queryset = asignaciones.objects.all()#using('json_db')
     permission_classes = [permissions.AllowAny]
     serializer_class = asignacionesSerializers
 
