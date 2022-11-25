@@ -43,9 +43,9 @@ class usuarios(models.Model):
     departamentosEmpresas = models.ForeignKey(departamentos_empresas, on_delete=models.CASCADE, related_name="departamentoEmpresaUs", null=False)
 
 class informacion(models.Model):
-    estatus = models.CharField(max_length=45)
-    asignacion = models.CharField(max_length=45)
-    observacion = models.TextField()
+    estatus = models.CharField(max_length=45, default="OPERATIVA")
+    asignacion = models.CharField(max_length=45, default="POR ASIGNAR")
+    observacion = models.TextField(default="S/N")
     ubicaciones = models.ForeignKey(ubicaciones, on_delete=models.CASCADE, related_name="ubicacionesUser", default=1)
     # usuarios = models.ForeignKey(usuarios, on_delete=models.CASCADE, related_name="informacion_us", null="True")
 

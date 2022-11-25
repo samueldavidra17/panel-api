@@ -46,8 +46,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'it',
+    'it.apps.Config',
+    'Json.apps.JsonConfig',
     'django_filters',
-    'rest_framework'
+    'rest_framework',
+    'drf_multiple_models'
 ]
 
 REST_FRAMEWORK = {
@@ -101,8 +104,12 @@ WSGI_APPLICATION = 'djangoapiconfig.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-    # 'equipos_it':{
+    'default': {},
+    'auth_db': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    },
+    'it_db':{
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'inventario_it',
         'USER': 'root',
@@ -110,7 +117,7 @@ DATABASES = {
         'HOST': '/var/run/mysql',
         'PORT': ''
     },
-    'JSON': {
+    'json_db': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'datos.sqlite3',
     }
@@ -156,6 +163,6 @@ STATIC_URL = 'static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
-# DATABASE_ROUTERS = ['routers.db_routers.AuthRouter']
+DATABASE_ROUTERS = ['routers.db_routers.AuthRouter', 'routers.db_routers.ItDb', 'roiters.db_routers.Json']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

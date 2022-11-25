@@ -75,14 +75,21 @@ class informacionSerializers(serializers.ModelSerializer):
         fields = ('id','estatus','asignacion','observacion','ubicaciones')
 
     def to_representation(self, value):
-        return {"id": value.id, "estatus": value.estatus, 
-        "asignacion": value.asignacion, "observacion": value.observacion, 
-        "ubicaciones":{"id": value.ubicaciones.id, "nombre": value.ubicaciones.nombre}}
+        return {
+            "id": value.id, 
+            "estatus": value.estatus, 
+            "asignacion": value.asignacion, 
+            "observacion": value.observacion, 
+            "ubicaciones":{
+                "id": value.ubicaciones.id, 
+                "nombre": value.ubicaciones.nombre
+            }
+        }
 
 class equiposSerializers(serializers.ModelSerializer):
     class Meta:
         model = equipos
-        fields = ('id','tipo_equipo','serial','serial_cargador','serial_unidad','dd','ram','tipo_ram','csb','tipo_equipo','antivirus','usuario_so','so','modelos','usuarios','empresas')
+        fields = ('serial','serial_cargador','serial_unidad','dd','ram','tipo_ram','csb','tipo_equipo','antivirus','usuario_so','so','modelos','usuarios','empresas')
         validators = [
             UniqueTogetherValidator(
                 queryset=equipos.objects.all(),
@@ -91,6 +98,11 @@ class equiposSerializers(serializers.ModelSerializer):
         ]
         usuarios = serializers.CharField(allow_null=True,source="usuarios",required=False)
         modelos = serializers.CharField(allow_null=True,source="modelos",required=False)
+
+    def create(self, validated_data):
+        print(validated_data)
+        info = informacion.objects.create()
+        return equipos.objects.create(id=info, **validated_data)
 
     def to_representation(self, value):
         if(type(value) != type({})):
@@ -230,7 +242,11 @@ class usuariosSerializers(serializers.ModelSerializer):
     def create(self, validated_data):
         try:
             departamentoEmpresa = departamentos_empresas.objects.get(departamentos=validated_data['departamento'], empresas=validated_data['empresa'])
-            usuario = {'cargo': validated_data['cargo'], 'nombre': validated_data['nombre'], 'departamentosEmpresas': departamentoEmpresa}
+            usuario = {
+                'cargo': validated_data['cargo'], 
+                'nombre': validated_data['nombre'], 
+                'departamentosEmpresas': departamentoEmpresa
+            }
             return usuarios.objects.create(**usuario)
         except departamentos_empresas.DoesNotExist:
             return HttpResponse("error message", status_code=500)
@@ -240,12 +256,20 @@ class usuariosSerializers(serializers.ModelSerializer):
         instance.cargo = validated_data['cargo']
         instance.departamentosEmpresas = departamentos_empresas.objects.get(departamentos=validated_data['departamento'], empresas=validated_data['empresa'])
         instance.save()
-        return instance;
+        return instance
 
     def to_representation(self, value):
         # if(equipos.value.usuarios):
         # equiposUs=equiposSerializers(many=True,required=False).data
-        return {"id": value.id, "cargo": value.cargo, "nombre": value.nombre, "departamento": value.departamentosEmpresas.departamentos.nombre, "departamentoId": value.departamentosEmpresas.departamentos.id, "empresaId": value.departamentosEmpresas.empresas.id, "empresa": value.departamentosEmpresas.empresas.nombre}
+        return {
+            "id": value.id, 
+            "cargo": value.cargo, 
+            "nombre": value.nombre, 
+            "departamento": value.departamentosEmpresas.departamentos.nombre, 
+            "departamentoId": value.departamentosEmpresas.departamentos.id, 
+            "empresaId": value.departamentosEmpresas.empresas.id, 
+            "empresa": value.departamentosEmpresas.empresas.nombre
+        }
 
 
 # class departamentosSerializers(serializers.ModelSerializer):
