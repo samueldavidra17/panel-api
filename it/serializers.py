@@ -1,11 +1,6 @@
-from asyncio.windows_events import NULL
-from contextlib import nullcontext
-from pickle import FALSE
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
 from .models import departamentos_empresas, empresas, marcas, tipos_equipos, tipos_equipos_marcas, departamentos, ubicaciones, usuarios, informacion, modelos, equipos, impresoras, dispositivos
 from django.http import HttpResponse
-from jSon.models import asignaciones, estatus, tiposRam, so
 from django.contrib.auth.models import User
 # from .json import
 
@@ -59,23 +54,21 @@ class impresorasSerializers(serializers.ModelSerializer):
 class dispositivosSerializers(serializers.ModelSerializer):
     class Meta:
         model = dispositivos
-        fields = ('serial','modelos','usuarios')
-    
-    def create(self, validated_data):
-        info = informacion.objects.create()
-        return dispositivos.objects.create(id=info, **validated_data)
+        fields = ('serial','csb', 'modelos','asignado')
     
     def to_representation(self, instance):
         return {
-            "usuario": instance.usuarios.nombre if instance.usuarios is not None else "Sin asignar",
-            "departamento": instance.usuarios.departamentosEmpresas.departamentos.nombre if instance.usuarios is not None else "Sin asignar",
-            "serial": instance.serial,
             "tipo_equipo": instance.modelos.tiposEquiposMarcas.tiposEquipos.nombre,
             "marca": instance.modelos.tiposEquiposMarcas.marcas.nombre,
-            "modelo": instance.modelos.nombre
+            "modelo": instance.modelos.nombre,
+            "serial": instance.serial,
+            "usuario": instance.asignado.usuario_so if instance.asignado is not None else "Sin asignar",
+            "departamento": instance.asignado.usuarios.departamentosEmpresas.departamentos.nombre 
+                            if instance.asignado is not None and instance.asignado.usuarios is not None
+                            else "Sin asignar"
         }
+
 class tipos_equiposSerializers(serializers.ModelSerializer):
-    # marcas = serializers.PrimaryKeyRelatedField(queryset=marcas.objects.all(), many=True)
     class Meta:
         model = tipos_equipos
         fields = ('id','nombre')
@@ -192,6 +185,8 @@ class historialSerializers(serializers.ModelSerializer):
         }
 class equiposSerializers(serializers.ModelSerializer):
     # history = HistoricalRecordField(read_only=True)
+    history = serializers.SerializerMethodField()
+    
     class Meta:
         model = equipos
         fields = ('serial','serial_cargador','serial_unidad','dd','ram','tipo_ram','csb','antivirus','usuario_so','so','modelos','usuarios','empresas', 'history')
@@ -210,14 +205,15 @@ class equiposSerializers(serializers.ModelSerializer):
         #     )
         # ]
 
-        usuarios = serializers.CharField(allow_null=True,source="usuarios",required=False)
-        modelos = serializers.CharField(allow_null=True,source="modelos",required=False)
-    history = serializers.SerializerMethodField()
 
     # def get_history(self, obj):
     #     # using slicing to exclude current field values
     #     h = obj.history.all()
     #     return h
+
+    def create(self, validated_data):
+        info = informacion.objects.create()
+        return equipos.objects.create(id=info, **validated_data)
 
     def validate(self, value):
         qs = equipos.objects.filter(usuarios=value["usuarios"])
@@ -243,9 +239,6 @@ class equiposSerializers(serializers.ModelSerializer):
     #             raise serializers.ValidationError("ERROR")
     #     return value
 
-    def create(self, validated_data):
-        info = informacion.objects.create()
-        return equipos.objects.create(id=info, **validated_data)
 
     # def update(self, instance, validated_data):
     #     instance.serial = validated_data['serial']
@@ -258,12 +251,9 @@ class equiposSerializers(serializers.ModelSerializer):
     #     return instance
 
     def to_representation(self, value):
-        # if(value.id.asignacion == 'PRESTAMO'):
-        #     print('hola')
         if(type(value) != type({})):
             model = value.history.__dict__['model']
-            # print(value.id.observacion)
-            fields = ['usuarios_id']#using('it_db')
+            fields = ['usuarios_id']
             serializer = HistoricalRecordField(model, value.history.all(), fields=fields, many=True)
             serializer.is_valid()
             def represetancion(x):
@@ -295,7 +285,6 @@ class equiposSerializers(serializers.ModelSerializer):
                     'ubicacion': value.id.ubicaciones.nombre,
                 },
                 'id': value.id_id,
-                # 'empresa': value.empresas.nombre,
                 'departamento': departamento,
                 'ubicacion': value.id.ubicaciones.nombre,
                 'serial': value.serial,
@@ -334,7 +323,6 @@ class equiposSerializers(serializers.ModelSerializer):
                 departamento = 'It'
             return {
             "id": value["id"],
-            # "empresa": value["empresas_id__nombre"],
             "ubicacion": value["id__ubicaciones__nombre"],
             "serial": value["serial"],
             "csb": value["csb"],
@@ -345,47 +333,6 @@ class equiposSerializers(serializers.ModelSerializer):
             "usuario": usuario,
             "departamento": departamento,
             # "historial": self.__dict__['_args']
-        }
-
-class equiposSerializersMin(serializers.ModelSerializer):
-    class Meta:
-        model = equipos
-        fields = ('id','serial','csb','usuario_so','modelos','usuarios','empresas')
-        validators = [
-            UniqueTogetherValidator(
-                queryset=equipos.objects.all(),
-                fields=['usuarios']
-            )
-        ]
-        usuarios = serializers.CharField(allow_null=True,source="usuarios",required=False)
-        modelos = serializers.CharField(allow_null=True,source="modelos",required=False)
-
-    def to_representation(self, value):
-        # print(value)
-        usuario = ''
-        usuario_id = ''
-        usuario_id_empresa = ''
-        if(value["usuarios_id__nombre"] is not None):
-            usuario = value["usuarios_id__nombre"]
-            usuario_id = value["usuarios_id"]
-            usuario_id_empresa = value["empresas_id__id"]
-        else:
-            usuario = 'Disponible'
-            usuario_id = ''
-            usuario_id_empresa = ''
-        # print(value.modelos is not None if value.modelos.nombre else 'nada')
-        return {
-            "id": value["id"],
-            "empresa": value["empresas_id__nombre"],
-            "ubicacion": value["id__ubicaciones__nombre"],
-            "serial": value["serial"],
-            "csb": value["csb"],
-            # "tipo_equipo": value["tipo_equipo"],
-            "usuario_so": value["usuario_so"],
-            "modelo": value["modelos_id__nombre"],
-            "marca": value["modelos_id__tiposEquiposMarcas_id__marcas_id__nombre"],
-            "usuario": usuario,
-            "empresa_id": usuario_id_empresa
         }
 
 class ubicacionesSerializers(serializers.ModelSerializer):
@@ -405,8 +352,6 @@ class departamentoSerializers(serializers.ModelSerializer):
     class Meta:
         model = departamentos
         fields = ('id','nombre', 'empresas')
-    # def to_representation(self, value):
-    #     return {"id": value.id, "nombre": value.nombre}
 
 class usuariosSerializers(serializers.ModelSerializer):
     empresa = serializers.PrimaryKeyRelatedField(queryset=empresas.objects.all(), many=False)
@@ -435,8 +380,6 @@ class usuariosSerializers(serializers.ModelSerializer):
         return instance
 
     def to_representation(self, value):
-        # if(equipos.value.usuarios):
-        # equiposUs=equiposSerializers(many=True,required=False).data
         return {
             "id": value.id,
             "cargo": value.cargo,
@@ -446,11 +389,3 @@ class usuariosSerializers(serializers.ModelSerializer):
             "empresaId": value.departamentosEmpresas.empresas.id,
             "empresa": value.departamentosEmpresas.empresas.nombre
         }
-
-# class departamentosSerializers(serializers.ModelSerializer):
-#     class Meta:
-#         model = departamentos
-#         fields = ('id','nombre','departamentos_de')
-
-#     departamentos_de = departamento_empresasSerializers(many=True, required=False)
-
