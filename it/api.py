@@ -13,7 +13,7 @@ from jSon.serializers import asignacionesSerializers, estatusSerializers, tiposR
 from rest_framework.decorators import api_view
 from rest_framework.generics import GenericAPIView
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, BasePermission, IsAuthenticatedOrReadOnly
 from django.db.models import Subquery
 from knox.models import AuthToken  
 from django.contrib.auth import login
@@ -46,6 +46,10 @@ class LoginAPI(KnoxLoginView):
         # print(loggin.data)
         return loggin
 
+class IsUser(BasePermission):
+   def has_permission(self, request, view, read_only=True):
+      return request.user
+    
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 100
     page_size_query_param = 'page_size'
@@ -164,7 +168,7 @@ class equiposViewSet(viewsets.ModelViewSet, GenericAPIView):
 
 class impresorasViewSet(viewsets.ModelViewSet):
     queryset = impresoras.objects.all()
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated | IsUser]
     serializer_class = impresorasSerializers
     filter_backends = [filters.SearchFilter]
     search_fields = []
