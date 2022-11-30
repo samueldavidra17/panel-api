@@ -58,6 +58,7 @@ class dispositivosSerializers(serializers.ModelSerializer):
     
     def to_representation(self, instance):
         return {
+            "id": instance.id,
             "tipo_equipo": instance.modelos.tiposEquiposMarcas.tiposEquipos.nombre,
             "marca": instance.modelos.tiposEquiposMarcas.marcas.nombre,
             "modelo": instance.modelos.nombre,
