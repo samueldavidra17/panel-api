@@ -1,3 +1,6 @@
 djangoapiconfig/__pycache__/*
 it/__pycache__/*
 it/migrations/__pycache__/*
+jSon/migrations/__pycache__/*
+jSon/__pycache__/*
+routers/__pycache__/*
