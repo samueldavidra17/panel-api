@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -123,6 +124,7 @@ DATABASES = {
         'HOST': '/var/run/mysql',
         'PORT': ''
     },
+    #NO BORRAR, investigar django multiple database
     # 'auth_db': {
     #     'ENGINE': 'django.db.backends.sqlite3',
     #     'NAME': BASE_DIR / 'db.sqlite3',
@@ -184,9 +186,17 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR,'public')
+]
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
+
+#NO BORRAR
+#Debido a si luego se implementan multiples bases de datos
 # DATABASE_ROUTERS = ['routers.db_routers.AuthRouter','routers.db_routers.ItDb','routers.db_routers.Json','routers.db_routers.knox']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -15,9 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    #estos path include hacen referencia a la carpeta junto con el urls.py
     path('', include('it.urls')),
     path('api/combox/', include('jSon.urls')),
 ]
+
+urlpatterns += staticfiles_urlpatterns()

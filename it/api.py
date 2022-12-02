@@ -20,7 +20,17 @@ from django.contrib.auth import login
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from knox.views import LoginView as KnoxLoginView
 
+# DOCUMENTACION
+
+# Todos los serializer provienen de serializers.py de la carpeta it
+
+# permissions hace referencia a la permisologia para acceder a cada tabla. es decir
+# que el usuario debe estar registrado
+
+#Filter hace referencia a los filtros dentro de cada vista
+
 # Register API
+# Proviene de django-rest-knox, investigar para conocer más
 class RegisterAPI(generics.GenericAPIView):
     serializer_class = RegisterSerializer
 
@@ -55,8 +65,9 @@ class StandardResultsSetPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 1000
 
+#ObjectMultipleModel viene de una libreria llamada multiple model 
 class TextComboxApi(ObjectMultipleModelAPIViewSet):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.BasePermission]
     def get_querylist(self):
         querylist = (
             {'queryset': asignaciones.objects.all(), 'serializer_class': asignacionesMinSerializers},
@@ -68,45 +79,39 @@ class TextComboxApi(ObjectMultipleModelAPIViewSet):
 
 class asignacionesViewSet(viewsets.ModelViewSet):
     queryset = asignaciones.objects.all()
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.BasePermission]
     serializer_class = asignacionesSerializers
 
 class tiposRamViewSet(viewsets.ModelViewSet):
     queryset = tiposRam.objects.all()
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.BasePermission]
     serializer_class = tiposRamSerializers
 
 class estatusViewSet(viewsets.ModelViewSet):
     queryset = estatus.objects.all()
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.BasePermission]
     serializer_class = estatusSerializers
 
 class soViewSet(viewsets.ModelViewSet):
     queryset = so.objects.all()
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.BasePermission]
     serializer_class = soSerializers
 
 class tipos_equiposViewSet(viewsets.ModelViewSet):
     queryset = tipos_equipos.objects.all()
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.BasePermission]
     serializer_class = tipos_equiposSerializers
     filter_backends = [filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend]
     filterset_fields = ['marcas']
-
-class tipos_equipos_marcasViewSet(viewsets.ModelViewSet):
-    queryset = tipos_equipos_marcas.objects.all()
-    permission_classes = [permissions.AllowAny]
-    serializer_class = tipos_equipos_marcasSerializers
-    filter_backends = [filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend]
-    filterset_fields = ['marcas_id__nombre','tiposEquipos_id__nombre']
+    search_fields = ['id']
 
 class historialEquiposViewSet(viewsets.ModelViewSet):
     queryset = equipos.objects.all()
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.BasePermission]
     serializer_class = historialSerializers
 
 class equiposViewSet(viewsets.ModelViewSet, GenericAPIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.BasePermission]
     serializer_class = equiposSerializers
     filter_backends = [filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend]
     search_fields = ['serial','serial_cargador','serial_unidad','dd','ram','tipo_ram','csb','antivirus','usuario_so','so']
@@ -123,6 +128,7 @@ class equiposViewSet(viewsets.ModelViewSet, GenericAPIView):
     # def get_equipos(request, pk):
     #     print(pk)
         
+    ### get_queryset sirve para traer todos los objetos de equipo y retornarlos###
     def get_queryset(self):
         queryset = equipos.objects.all()
         return queryset
@@ -141,18 +147,22 @@ class equiposViewSet(viewsets.ModelViewSet, GenericAPIView):
         'empresas_id__id')
         search = self.request.query_params.get('search', None)
         # print(search)
+
+        ###Filtros hechos a mano donde startwith se refiere a la letra inicial###
         if search:
             queryset=queryset.filter(
-            Q(serial__startswith = search) |
-            Q(empresas_id__nombre__startswith = search) |
-            Q(id__ubicaciones__nombre__startswith = search) |
-            Q(csb__startswith = search) |
-            Q(usuario_so__startswith = search) |
-            Q(modelos_id__nombre__startswith = search) |
-            Q(modelos_id__tiposEquiposMarcas_id__marcas_id__nombre__startswith = search) |
-            Q(usuarios_id__nombre__startswith = search) 
+            Q(serial__startswith = search.upper()) |
+            Q(empresas_id__nombre__startswith = search.upper()) |
+            Q(id__ubicaciones__nombre__startswith = search.upper()) |
+            Q(csb__startswith = search.upper()) |
+            Q(usuario_so__startswith = search.upper()) |
+            Q(modelos_id__nombre__startswith = search.upper()) |
+            Q(modelos_id__tiposEquiposMarcas_id__marcas_id__nombre__startswith = search.upper()) |
+            Q(usuarios_id__nombre__startswith = search.upper()) 
             ) 
 
+
+        ###Paginacion###
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = equiposSerializers(page, many=True)
@@ -168,57 +178,58 @@ class equiposViewSet(viewsets.ModelViewSet, GenericAPIView):
 
 class impresorasViewSet(viewsets.ModelViewSet):
     queryset = impresoras.objects.all()
-    permission_classes = [permissions.IsAuthenticated | IsUser]
+    permission_classes = [permissions.BasePermission | IsUser]
     serializer_class = impresorasSerializers
     filter_backends = [filters.SearchFilter]
     search_fields = []
 
 class dispositivosViewSet(viewsets.ModelViewSet):
     queryset = dispositivos.objects.all()
-    permission_classes = [permissions.AllowAny] 
+    permission_classes = [permissions.BasePermission] 
     serializer_class = dispositivosSerializers
     filter_backends = [filters.SearchFilter]
-    search_fields = []
+    search_fields = ["modelos__tiposEquiposMarcas_id__tiposEquipos_id__nombre"]
 
 
 class modelosViewSet(viewsets.ModelViewSet):
     queryset = modelos.objects.all()
     serializer_class = modelosSerializers
-    permission_classes = [permissions.AllowAny] 
+    permission_classes = [permissions.BasePermission] 
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     filterset_fields = ['id','nombre','tiposEquiposMarcas_id__tiposEquipos_id', 'tiposEquiposMarcas_id__marcas_id']
     
 
 class marcasViewSet(viewsets.ModelViewSet):
     queryset = marcas.objects.all()
-    permission_classes = [permissions.AllowAny] 
+    permission_classes = [permissions.BasePermission] 
     serializer_class = marcasSerializers
-    permission_classes = [permissions.AllowAny] 
-    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
+    permission_classes = [permissions.BasePermission] 
+    filter_backends = [filters.SearchFilter,django_filters.rest_framework.DjangoFilterBackend]
     filterset_fields = ['tiposEquiposMarcas']
+    search_fields = ['tiposEquiposMarcas__id']
 
 class informacionViewSet(viewsets.ModelViewSet):
     queryset = informacion.objects.all()
-    permission_classes = [permissions.AllowAny] 
+    permission_classes = [permissions.BasePermission] 
     serializer_class = informacionSerializers
     filter_backends = [filters.SearchFilter]
     search_fields = ['asignacion']
 
 class ubicacionesViewSet(viewsets.ModelViewSet):
     queryset = ubicaciones.objects.all()
-    permission_classes = [permissions.AllowAny] 
+    permission_classes = [permissions.BasePermission] 
     serializer_class = ubicacionesSerializers
 
 class usuariosViewSet(viewsets.ModelViewSet):
     queryset = usuarios.objects.all()
-    permission_classes = [permissions.AllowAny] 
+    permission_classes = [permissions.BasePermission] 
     serializer_class = usuariosSerializers
     filter_backends = [filters.SearchFilter]
     search_fields = ['nombre']
 
 class departamentosViewSet(viewsets.ModelViewSet):
     queryset = departamentos.objects.all()
-    permission_classes = [permissions.AllowAny] 
+    permission_classes = [permissions.BasePermission] 
     serializer_class = departamentoSerializers
     filter_backends = [filters.SearchFilter,django_filters.rest_framework.DjangoFilterBackend]
     search_fields = []
@@ -226,7 +237,7 @@ class departamentosViewSet(viewsets.ModelViewSet):
 
 class empresasViewSet(viewsets.ModelViewSet):
     queryset = empresas.objects.all()
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.BasePermission]
     serializer_class = empresasSerializers    
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     filterset_fields = ['id']

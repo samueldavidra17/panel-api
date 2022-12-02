@@ -3,6 +3,8 @@ from .api import tipos_equiposViewSet, dispositivosViewSet, empresasViewSet, dep
 from knox import views as knox_views
 from django.urls import path
 
+#Toda la data proviene de api.py
+#El default router crea una vista para así visualizar como va la apí
 router = routers.DefaultRouter()
 
 router.register('api/tiposequipos', tipos_equiposViewSet , 'tipos_equipos')
@@ -23,6 +25,7 @@ router.register('api/estatus', estatusViewSet, 'estatus')
 router.register('api/sistemasoperativos', soViewSet, 'so')
 router.register('api/combox', TextComboxApi, 'combox')
 
+#urls que vienen directamente de django-rest-knox
 urlpatterns = [
     path('api/register/', RegisterAPI.as_view(), name='register'),
     path('api/login/', LoginAPI.as_view(), name='login'),
