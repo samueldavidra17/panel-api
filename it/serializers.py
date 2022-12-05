@@ -2,22 +2,22 @@ from rest_framework import serializers
 from .models import departamentos_empresas, empresas, marcas, tipos_equipos, tipos_equipos_marcas, departamentos, ubicaciones, usuarios, informacion, modelos, equipos, impresoras, dispositivos
 from django.http import HttpResponse
 from django.contrib.auth.models import User
-import requests
-from bs4 import BeautifulSoup as b
+# import requests
+# from bs4 import BeautifulSoup as b
 
 
-###Web Scrapy no implementado por falta de tiempo###
-url = 'http://172.17.247.247/SSI/info_configuration.htm'
-def get_count(url):
-    req = requests.get(url)
-    html = b(req.text, "html.parser")
-    entradas = html.find_all('table',{'class':'mainContentArea'})
-    for i, buscar in enumerate(entradas):
-        busqueda = buscar.find(['tr',{'class':'itemFont'}]).getText()
-        iterator = i+1
-        if(iterator == 2):
-            return busqueda
-count1 = get_count(url).split(":")[1]
+# ###Web Scrapy no implementado por falta de tiempo###
+# url = 'http://172.17.247.247/SSI/info_configuration.htm'
+# def get_count(url):
+#     req = requests.get(url)
+#     html = b(req.text, "html.parser")
+#     entradas = html.find_all('table',{'class':'mainContentArea'})
+#     for i, buscar in enumerate(entradas):
+#         busqueda = buscar.find(['tr',{'class':'itemFont'}]).getText()
+#         iterator = i+1
+#         if(iterator == 2):
+#             return busqueda
+# count1 = get_count(url).split(":")[1]
 
 # from .json import
 
