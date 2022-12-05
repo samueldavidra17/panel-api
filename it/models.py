@@ -101,7 +101,7 @@ class equipos(models.Model):
     tipo_ram = models.CharField(max_length=45, default="S/N", blank=True)
     antivirus = models.CharField(max_length=45, default="S/N", blank=True)
     so = models.CharField(max_length=45, default="S/N", blank=True)
-    usuario_so = models.CharField(max_length=45, unique=True, null=True)
+    usuario_so = models.CharField(max_length=45, null=True)
     usuarios = models.ForeignKey(usuarios, on_delete=models.CASCADE, related_name="equiposUs", null=True, blank=True)
     #Para crear la bitacora o historial se usa esto, investigar para mayor información django-simple-history
     history = HistoricalRecords()
@@ -144,7 +144,7 @@ class dispositivos(models.Model):
     serial = models.CharField(max_length=45, default="S/N")
     csb = models.CharField(max_length=45, default="S/N")
     modelos = models.ForeignKey(modelos, on_delete=models.CASCADE, related_name="modelosDis", null="True")
-    asignado = models.OneToOneField(equipos, to_field='usuario_so', on_delete=models.CASCADE, related_name="equiposDis", null="True")
+    asignado = models.OneToOneField(equipos, on_delete=models.CASCADE, related_name="equiposDis", null="True")
 
     def save(self, *args, **kwargs):
         self.serial = self.serial.upper()
