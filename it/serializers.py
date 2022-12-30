@@ -227,20 +227,7 @@ class equiposSerializers(serializers.ModelSerializer):
     class Meta:
         model = equipos
         fields = ('serial','serial_cargador','serial_unidad','dd','ram','tipo_ram','csb','antivirus','usuario_so','so','modelos','usuarios','empresas', 'history')
-        extra_kwargs = {'serial':{"default": ''}}
         read_only_fields = ('history',)
-        # query = equipos.objects.all().values('id__asignacion')
-        # for i in query:
-        #     valor = i['id__asignacion']
-        #     if(valor == "PRESTAMO"):
-        #     else:
-        #         print('hola')
-        # validators = [
-        #     UniqueTogetherValidator(
-        #         queryset=equipos.objects.all(),
-        #         fields=['usuarios']
-        #     )
-        # ]
 
 
     # def get_history(self, obj):
@@ -253,19 +240,19 @@ class equiposSerializers(serializers.ModelSerializer):
         return equipos.objects.create(id=info,  **validated_data)
     #Validando si el equipo se encuentra en prestamo para asignarlo a más de un usuario
     #O que si no, no pueda tener más de un equipo
-    def validate(self, value):
-        qs = equipos.objects.filter(usuarios=value["usuarios"])
-        if(self.__dict__['_args'] == ()):
-            asignar = "Por Asignar"
-        else:
-            asignar = self.__dict__['_args'][0].id.asignacion
-        # filt = equipos.objects.filter(id=intoSelf)
-        # asignar = filt[0].id.asignacion
-        if(asignar != "PRESTAMO"):
-            if(value["usuarios"] != None):
-                if qs.exists():
-                    raise serializers.ValidationError('Name must be unique per site')
-        return value
+    # def validate(self, value):
+    #     qs = equipos.objects.filter(usuarios=value["usuarios"])
+    #     if(self.__dict__['_args'] == ()):
+    #         asignar = "Por Asignar"
+    #     else:
+    #         asignar = self.__dict__['_args'][0].id.asignacion
+    #     # filt = equipos.objects.filter(id=intoSelf)
+    #     # asignar = filt[0].id.asignacion
+    #     if(asignar != "EN PRESTAMO"):
+    #         if(value["usuarios"] != None):
+    #             if qs.exists():
+    #                 raise serializers.ValidationError('Name must be unique per site')
+    #     return value
 
     # def validate(self, value):
     #     # qs = equipos.objects.filter(self._meta.unique_together)
@@ -276,17 +263,6 @@ class equiposSerializers(serializers.ModelSerializer):
     #         if(value["usuarios"].id != 1 if value["usuarios"] is not None else "S/N"):
     #             raise serializers.ValidationError("ERROR")
     #     return value
-
-
-    # def update(self, instance, validated_data):
-    #     instance.serial = validated_data['serial']
-    #     instance.tipos_equipo = validated_data['tipos_equipo']
-    #     instance.serial_cargador = validated_data['serial_cargador']
-    #     instance.serial_unidad = validated_data['serial_unidad']
-    #     instance.cargo = validated_data['cargo']
-    #     instance.departamentosEmpresas = departamentos_empresas.objects.get(departamentos=validated_data['departamento'], empresas=validated_data['empresa'])
-    #     instance.save()
-    #     return instance
 
     def to_representation(self, value):
         #Se fragmenta para que en una vista detallada se muestren todos los datos de equipo

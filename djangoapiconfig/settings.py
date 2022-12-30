@@ -62,11 +62,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
-    # 'DEFAULT_AUTHENTICATION_CLASSES': [
-    #     'rest_framework.authentication.SessionAuthentication',
-    #     'knox.auth.TokenAuthentication',
-    #     # 'rest_framework.authentication.TokenAuthentication' 
-    # ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'knox.auth.TokenAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication' 
+    ],
 }
 
 MIDDLEWARE = [
@@ -82,14 +82,14 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://172.17.245.104:3000",
+    "http://172.17.245.162:3000",
     "http://172.17.244.183:3000",
     "http://localhost:3000",
 ]
 
 CORS_ORIGIN_WHITELIST = [
     "http://172.17.244.183:3000",
-    "http://172.17.245.104:3000",
+    "http://172.17.245.162:3000",
     "http://localhost:3000",
 ]
 

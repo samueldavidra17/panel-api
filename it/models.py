@@ -66,7 +66,7 @@ class usuarios(models.Model):
     def save(self, *args, **kwargs):
         self.nombre = self.nombre.upper()
         self.cargo = self.cargo.upper()
-        super(informacion, self).save( *args, **kwargs)
+        super(usuarios, self).save(*args, **kwargs)
 
 class informacion(models.Model):
     estatus = models.CharField(max_length=45, default="OPERATIVA")
