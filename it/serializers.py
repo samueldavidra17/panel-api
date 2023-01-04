@@ -2,23 +2,7 @@ from rest_framework import serializers
 from .models import departamentos_empresas, empresas, marcas, tipos_equipos, tipos_equipos_marcas, departamentos, ubicaciones, usuarios, informacion, modelos, equipos, impresoras, dispositivos
 from django.http import HttpResponse
 from django.contrib.auth.models import User
-
-###Web Scrapy no implementado por falta de tiempo###
-# import requests
-# from bs4 import BeautifulSoup as b
-
-# url = 'http://172.17.247.247/SSI/info_configuration.htm'
-# def get_count(url):
-#     req = requests.get(url)
-#     html = b(req.text, "html.parser")
-#     entradas = html.find_all('table',{'class':'mainContentArea'})
-#     for i, buscar in enumerate(entradas):
-#         busqueda = buscar.find(['tr',{'class':'itemFont'}]).getText()
-#         iterator = i+1
-#         if(iterator == 2):
-#             return busqueda
-# count1 = get_count(url).split(":")[1]
-
+from django.contrib.auth import authenticate
 #DOCUMENTACION
 # model hace referencia a los modelos que vienen de models.py
 # fields hace referencia a los campos que se encuentran o dentro del modelo o que se
@@ -31,7 +15,7 @@ from django.contrib.auth.models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email')
+        fields = ('id', 'username',  'first_name', 'last_name')
 
 # Register Serializer
 class RegisterSerializer(serializers.ModelSerializer):
@@ -44,6 +28,16 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(validated_data['username'], validated_data['email'], validated_data['password'])
 
         return user
+
+class LoginSerializer(serializers.Serializer):
+  username = serializers.CharField()
+  password = serializers.CharField()
+
+  def validate(self, data):
+    user = authenticate(**data)
+    if user and user.is_active:
+      return user
+    raise serializers.ValidationError("Incorrect Credentials")
 
 class impresorasSerializers(serializers.ModelSerializer):
     class Meta:
@@ -181,13 +175,6 @@ class HistoricalRecordField(serializers.ModelSerializer):#.ListField):
     class Meta:
         pass
 
-    ##FASE 1 DE EXPERIMENTACIÓN CON LAS HISTORIAS##
-    # child = serializers.DictField()
-
-    # def to_representation(self, data):
-    #     return super().to_representation(data.values())
-
-
 class historialSerializers(serializers.ModelSerializer):
     class Meta:
         model = equipos
@@ -229,40 +216,9 @@ class equiposSerializers(serializers.ModelSerializer):
         fields = ('serial','serial_cargador','serial_unidad','dd','ram','tipo_ram','csb','antivirus','usuario_so','so','modelos','usuarios','empresas', 'history')
         read_only_fields = ('history',)
 
-
-    # def get_history(self, obj):
-    #     # using slicing to exclude current field values
-    #     h = obj.history.all()
-    #     return h
-
     def create(self, validated_data):
         info = informacion.objects.create()
         return equipos.objects.create(id=info,  **validated_data)
-    #Validando si el equipo se encuentra en prestamo para asignarlo a más de un usuario
-    #O que si no, no pueda tener más de un equipo
-    # def validate(self, value):
-    #     qs = equipos.objects.filter(usuarios=value["usuarios"])
-    #     if(self.__dict__['_args'] == ()):
-    #         asignar = "Por Asignar"
-    #     else:
-    #         asignar = self.__dict__['_args'][0].id.asignacion
-    #     # filt = equipos.objects.filter(id=intoSelf)
-    #     # asignar = filt[0].id.asignacion
-    #     if(asignar != "EN PRESTAMO"):
-    #         if(value["usuarios"] != None):
-    #             if qs.exists():
-    #                 raise serializers.ValidationError('Name must be unique per site')
-    #     return value
-
-    # def validate(self, value):
-    #     # qs = equipos.objects.filter(self._meta.unique_together)
-    #     # print(qs)
-    #     if(value["id"].asignacion != "PRESTAMO"):
-    #         print(value["usuarios"].nombre if value["usuarios"] is not None else "S/N")
-    #         print(value["usuarios"].id if value["usuarios"] is not None else "S/N")
-    #         if(value["usuarios"].id != 1 if value["usuarios"] is not None else "S/N"):
-    #             raise serializers.ValidationError("ERROR")
-    #     return value
 
     def to_representation(self, value):
         #Se fragmenta para que en una vista detallada se muestren todos los datos de equipo
@@ -328,17 +284,11 @@ class equiposSerializers(serializers.ModelSerializer):
             }
         else:
             usuario = ''
-            usuario_id = ''
-            usuario_id_empresa = ''
             if(value["usuarios_id"] is not None):
                 usuario = value["usuarios_id__nombre"]
-                usuario_id = value["usuarios_id"]
-                usuario_id_empresa = value["empresas_id__id"]
                 departamento = value["usuarios_id__departamentosEmpresas_id__departamentos_id__nombre"]
             else:
                 usuario = 'Disponible'
-                usuario_id = ''
-                usuario_id_empresa = ''
                 departamento = 'It'
             return {
             "id": value["id"],

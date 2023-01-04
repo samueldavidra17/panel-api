@@ -115,7 +115,14 @@ class equipos(models.Model):
         self.csb = self.csb.upper()
         self.usuario_so = self.usuario_so.upper() if self.usuario_so is not None else self.usuario_so
         super(equipos, self).save( *args, **kwargs) # Call the "real" save() method.
-    # historyUser = HistoricalRecords(excluded_fields=['empresas, modelos, serial, serial_unidad, serial_cargador, csb, dd, ram, tipo_ram, antivirus, so, usuarios_so, history'])
+
+    def save_without_history(self, *args, **kwargs):
+        self.skip_history_when_saving = True
+        try:
+            ret = self.save(*args, **kwargs)
+        finally:
+            del self.skip_history_when_saving
+        return ret
 
 class impresoras(models.Model):
     TIPOS_CONEXION = (

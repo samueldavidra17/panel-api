@@ -1,24 +1,16 @@
-from .models import empresas, marcas, tipos_equipos, tipos_equipos_marcas, departamentos, ubicaciones, usuarios, informacion, modelos, equipos, impresoras, dispositivos
-from rest_framework import viewsets, permissions, filters, status, mixins, generics
-from .serializers import tipos_equiposSerializers, tipos_equipos_marcasSerializers, equiposSerializers, impresorasSerializers, dispositivosSerializers, modelosSerializers, marcasSerializers, informacionSerializers, ubicacionesSerializers, usuariosSerializers, departamentoSerializers, empresasSerializers, historialSerializers, UserSerializer, RegisterSerializer
+from .models import empresas, marcas, tipos_equipos, departamentos, ubicaciones, usuarios, informacion, modelos, equipos, impresoras, dispositivos
+from rest_framework import viewsets, permissions, filters, generics
+from .serializers import tipos_equiposSerializers, LoginSerializer, equiposSerializers, impresorasSerializers, dispositivosSerializers, modelosSerializers, marcasSerializers, informacionSerializers, ubicacionesSerializers, usuariosSerializers, departamentoSerializers, empresasSerializers, historialSerializers, UserSerializer, RegisterSerializer
 import django_filters.rest_framework
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
-from rest_framework.decorators import action
 from django.db.models import Q
 from drf_multiple_model.viewsets import ObjectMultipleModelAPIViewSet
 from jSon.models import asignaciones, tiposRam, so, estatus
 from jSon.serializers import asignacionesSerializers, estatusSerializers, tiposRamSerializers, soSerializers, asignacionesMinSerializers, estatusMinSerializers, tiposRamMinSerializers, soMinSerializers
-from rest_framework.decorators import api_view
 from rest_framework.generics import GenericAPIView
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-from rest_framework.permissions import IsAuthenticated, BasePermission, IsAuthenticated
-from django.db.models import Subquery
+from rest_framework.permissions import BasePermission
 from knox.models import AuthToken  
-from django.contrib.auth import login
-from rest_framework.authtoken.serializers import AuthTokenSerializer
-from knox.views import LoginView as KnoxLoginView
 
 # DOCUMENTACION
 
@@ -43,17 +35,19 @@ class RegisterAPI(generics.GenericAPIView):
         "token": AuthToken.objects.create(user)[1]
         })
 
-class LoginAPI(KnoxLoginView):
-    authentication_classes = [BasicAuthentication]
-    permission_classes = (permissions.AllowAny,)
+class LoginAPI(generics.GenericAPIView):
+  serializer_class = LoginSerializer
+  permission_classes = [permissions.AllowAny]
 
-    def post(self, request, format=None):
-        serializer = AuthTokenSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        login(request, user)
-        loggin = super(LoginAPI, self).post(request, format=None)
-        return loggin
+  def post(self, request, *args, **kwargs):
+    serializer = self.get_serializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    user = serializer.validated_data
+    _, token = AuthToken.objects.create(user)
+    return Response({
+      "user": UserSerializer(user, context=self.get_serializer_context()).data,
+      "token": token
+    })
 
 class IsUser(BasePermission):
    def has_permission(self, request, view, read_only=True):
@@ -122,6 +116,39 @@ class equiposViewSet(viewsets.ModelViewSet, GenericAPIView):
         queryset = equipos.objects.all()
         return queryset
 
+    def partial_update(self, request, *args, **kwargs):
+        print("patch")
+        equipo = self.get_object()
+        data = request.data
+        try:
+            usuario = usuarios.objects.get(pk=data["usuarios"])
+            equipo.usuarios = usuario
+        except KeyError:
+            pass 
+        equipo.save()
+        serializer = equiposSerializers(equipo)
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        print("update")
+        equipo = self.get_object()
+        data = request.data
+        
+        equipo.serial = data.get("serial", equipo.serial)
+        equipo.serial_cargador = data.get("serial_cargador", equipo.serial_cargador)
+        equipo.serial_unidad = data.get("serial_unidad", equipo.serial_unidad)
+        equipo.so = data.get("so", equipo.so)
+        equipo.csb = data.get("csb", equipo.csb)
+        equipo.dd = data.get("dd", equipo.dd)
+        equipo.ram = data.get("ram", equipo.ram)
+        equipo.tipo_ram = data.get("tipo_ram", equipo.tipo_ram)
+        equipo.usuario_so = data.get("usuario_so", equipo.usuario_so)
+        equipo.antivirus = data.get("antivirus", equipo.antivirus)
+
+        equipo.save_without_history()
+        serializer = equiposSerializers(equipo)    
+        return Response(serializer.data)
+
     def list(self, request):
         queryset = equipos.objects.values('id','empresas_id__nombre','id__ubicaciones__nombre',
         'serial','csb','usuario_so','modelos_id__nombre',
@@ -153,11 +180,6 @@ class equiposViewSet(viewsets.ModelViewSet, GenericAPIView):
             return self.get_paginated_response(serializer.data)
         serializer = equiposSerializers(queryset, many=True)
         return Response(serializer.data)
-
-    # def retrieve(self, request, *args, **kwargs):
-    #     queryset = equipos.objects.filter(**kwargs)
-    #     serializer = equiposSerializers(queryset, many=False)
-    #     return Response(serializer.data)
 
 class impresorasViewSet(viewsets.ModelViewSet):
     queryset = impresoras.objects.all()
