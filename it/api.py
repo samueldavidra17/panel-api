@@ -1,13 +1,11 @@
-from .models import empresas, marcas, tipos_equipos, departamentos, ubicaciones, usuarios, informacion, modelos, equipos, impresoras, dispositivos
+from .models import empresas, marcas, tipos_equipos, departamentos, ubicaciones, usuarios, informacion, modelos, equipos, impresoras, dispositivos, asignaciones, tiposRam, so, estatus
+from .serializers import tipos_equiposSerializers, LoginSerializer, equiposSerializers, impresorasSerializers, dispositivosSerializers, modelosSerializers, marcasSerializers, informacionSerializers, ubicacionesSerializers, usuariosSerializers, departamentoSerializers, empresasSerializers, historialSerializers, UserSerializer, RegisterSerializer, asignacionesSerializers, estatusSerializers, tiposRamSerializers, soSerializers, asignacionesMinSerializers, estatusMinSerializers, tiposRamMinSerializers, soMinSerializers
 from rest_framework import viewsets, permissions, filters, generics
-from .serializers import tipos_equiposSerializers, LoginSerializer, equiposSerializers, impresorasSerializers, dispositivosSerializers, modelosSerializers, marcasSerializers, informacionSerializers, ubicacionesSerializers, usuariosSerializers, departamentoSerializers, empresasSerializers, historialSerializers, UserSerializer, RegisterSerializer
-import django_filters.rest_framework
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+import django_filters.rest_framework
 from django.db.models import Q
 from drf_multiple_model.viewsets import ObjectMultipleModelAPIViewSet
-from jSon.models import asignaciones, tiposRam, so, estatus
-from jSon.serializers import asignacionesSerializers, estatusSerializers, tiposRamSerializers, soSerializers, asignacionesMinSerializers, estatusMinSerializers, tiposRamMinSerializers, soMinSerializers
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import BasePermission
 from knox.models import AuthToken  
@@ -31,8 +29,8 @@ class RegisterAPI(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         return Response({
-        "user": UserSerializer(user, context=self.get_serializer_context()).data,
-        "token": AuthToken.objects.create(user)[1]
+            "user": UserSerializer(user, context=self.get_serializer_context()).data,
+            "token": AuthToken.objects.create(user)[1]
         })
 
 class LoginAPI(generics.GenericAPIView):

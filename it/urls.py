@@ -24,7 +24,6 @@ router.register('api/tiposram', tiposRamViewSet, 'tiposram')
 router.register('api/estatus', estatusViewSet, 'estatus')
 router.register('api/sistemasoperativos', soViewSet, 'so')
 router.register('api/combox', TextComboxApi, 'combox')
-
 #urls que vienen directamente de django-rest-knox
 urlpatterns = [
     path('api/register/', RegisterAPI.as_view(), name='register'),

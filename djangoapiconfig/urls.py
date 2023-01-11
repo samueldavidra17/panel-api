@@ -21,7 +21,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     #estos path include hacen referencia a la carpeta junto con el urls.py
     path('', include('it.urls')),
-    path('api/combox/', include('jSon.urls')),
 ]
 
 urlpatterns += staticfiles_urlpatterns()

@@ -48,12 +48,10 @@ INSTALLED_APPS = [
     'corsheaders',
     'simple_history',
     'it.apps.Config',
-    'jSon.apps.JsonConfig',
     'drf_multiple_model',
     'django_filters',
     'rest_framework',
     'knox',
-    # 'rest_framework.authtoken',
 ]
 
 REST_FRAMEWORK = {
@@ -65,7 +63,6 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
         'knox.auth.TokenAuthentication',
-        # 'rest_framework.authentication.TokenAuthentication' 
     ],
 }
 
@@ -82,15 +79,19 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
+    "http://localhost",
+    "http://www.panel-it.com",
+    "http://www.panel-it.com:3000",
     "http://172.17.245.162:3000",
-    "http://172.17.244.183:3000",
-    "http://localhost:3000",
+    "http://172.17.247.254"
 ]
 
 CORS_ORIGIN_WHITELIST = [
-    "http://172.17.244.183:3000",
+    "http://localhost",
+    "http://www.panel-it.com",
+    "http://www.panel-it.com:3000",
     "http://172.17.245.162:3000",
-    "http://localhost:3000",
+    "http://172.17.247.254"
 ]
 
 ROOT_URLCONF = 'djangoapiconfig.urls'
@@ -119,36 +120,13 @@ WSGI_APPLICATION = 'djangoapiconfig.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'inventario_it',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': '/var/run/mysql',
-        'PORT': ''
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'panel_it',
+        'USER': 'postgres',
+        'PASSWORD': '12345',
+        'HOST': 'localhost',
+        'PORT': '5432'
     },
-    #NO BORRAR, investigar django multiple database
-    # 'auth_db': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': BASE_DIR / 'db.sqlite3',
-    # },
-    # 'knox_db': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': BASE_DIR / 'knox.sqlite3',
-    # },
-    # 'it_db':{
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'equipos_it',
-    #     'USER': 'root',
-    #     'PASSWORD': '',
-    #     'HOST': '/var/run/mysql',
-    #     'PORT': ''
-    #     # 'ENGINE': 'django.db.backends.sqlite3',
-    #     # 'NAME': BASE_DIR / 'it.sqlite3',
-    # },
-    # 'json_db': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': BASE_DIR / 'datos.sqlite3',
-    # }
 }
 
 
@@ -186,19 +164,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR,'public')
 ]
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, '/')
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
-
-
-#NO BORRAR
-#Debido a si luego se implementan multiples bases de datos
-# DATABASE_ROUTERS = ['routers.db_routers.AuthRouter','routers.db_routers.ItDb','routers.db_routers.Json','routers.db_routers.knox']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

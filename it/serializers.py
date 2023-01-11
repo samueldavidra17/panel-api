@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import departamentos_empresas, empresas, marcas, tipos_equipos, tipos_equipos_marcas, departamentos, ubicaciones, usuarios, informacion, modelos, equipos, impresoras, dispositivos
+from .models import departamentos_empresas, empresas, marcas, tipos_equipos, tipos_equipos_marcas, departamentos, ubicaciones, usuarios, informacion, modelos, equipos, impresoras, dispositivos, asignaciones, estatus, so, tiposRam
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
@@ -30,14 +30,14 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 class LoginSerializer(serializers.Serializer):
-  username = serializers.CharField()
-  password = serializers.CharField()
+    username = serializers.CharField()
+    password = serializers.CharField()
 
-  def validate(self, data):
-    user = authenticate(**data)
-    if user and user.is_active:
-      return user
-    raise serializers.ValidationError("Incorrect Credentials")
+    def validate(self, data):
+        user = authenticate(**data)
+        if user and user.is_active:
+            return user
+        raise serializers.ValidationError("Incorrect Credentials")
 
 class impresorasSerializers(serializers.ModelSerializer):
     class Meta:
@@ -164,12 +164,11 @@ class informacionSerializers(serializers.ModelSerializer):
             }
         }
 
-class HistoricalRecordField(serializers.ModelSerializer):#.ListField):
+class HistoricalRecordField(serializers.ModelSerializer):
     #Creando el historial o la bitacora con la libreria de django-simple-history
     def __init__(self, model, *args, fields='__all__', **kwargs):
         self.Meta.model = model
         self.Meta.fields = fields
-        # print(fields)
         super().__init__()
 
     class Meta:
@@ -208,7 +207,6 @@ class historialSerializers(serializers.ModelSerializer):
             "historial": historial
         }
 class equiposSerializers(serializers.ModelSerializer):
-    # history = HistoricalRecordField(read_only=True)
     history = serializers.SerializerMethodField()
     
     class Meta:
@@ -238,18 +236,14 @@ class equiposSerializers(serializers.ModelSerializer):
                 }
             historial = map(represetancion, serializer.initial_data)
             usuario = ''
-            usuario_id = ''
             departamento = ''
             #Operador ternario
             if(value.usuarios is not None):
                 usuario = value.usuarios.nombre
-                usuario_id = value.usuarios.id
-                usuario_id_empresa = value.empresas.id if value.empresas is not None else "S/N"
+                cargo = value.usuarios.cargo
                 departamento = value.usuarios.departamentosEmpresas.departamentos.nombre
             else:
                 usuario = 'S/N'
-                usuario_id = ''
-                usuario_id_empresa = ''
                 departamento = 'It'
             # return value.id.estatus
             return {
@@ -279,6 +273,7 @@ class equiposSerializers(serializers.ModelSerializer):
                 'marca': value.modelos.tiposEquiposMarcas.marcas.nombre,
                 'marca_id': value.modelos.tiposEquiposMarcas.marcas.id,
                 'usuario': usuario,
+                'usuario_cargo': cargo,
                 'empresa_id': value.empresas.id if value.empresas is not None else "S/N",
                 'historial': historial
             }
@@ -300,8 +295,7 @@ class equiposSerializers(serializers.ModelSerializer):
             "modelo": value["modelos_id__nombre"],
             "marca": value["modelos_id__tiposEquiposMarcas_id__marcas_id__nombre"],
             "usuario": usuario,
-            "departamento": departamento,
-            # "historial": self.__dict__['_args']
+            "departamento": departamento
         }
 
 class ubicacionesSerializers(serializers.ModelSerializer):
@@ -360,3 +354,56 @@ class usuariosSerializers(serializers.ModelSerializer):
             "empresa": value.departamentosEmpresas.empresas.id,
             "empresaNombre": value.departamentosEmpresas.empresas.nombre
         }
+
+class asignacionesSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = asignaciones
+        fields = ('id','nombre')
+
+class estatusSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = estatus
+        fields = ('id','nombre')
+
+class tiposRamSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = tiposRam
+        fields = ('id','nombre')
+
+    
+class soSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = so
+        fields = ('id','nombre')
+
+class asignacionesMinSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = asignaciones
+        fields = ('id','nombre')
+
+    def to_representation(self, value):
+        return value.nombre
+
+class estatusMinSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = estatus
+        fields = ('id','nombre')
+
+    def to_representation(self, value):
+        return value.nombre
+
+class tiposRamMinSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = tiposRam
+        fields = ('id','nombre')
+
+    def to_representation(self, value):
+        return value.nombre
+
+class soMinSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = so
+        fields = ('id','nombre')
+
+    def to_representation(self, value):
+        return value.nombre

@@ -158,3 +158,14 @@ class dispositivos(models.Model):
         self.csb = self.csb.upper()
         super(informacion, self).save( *args, **kwargs)
     
+class asignaciones(models.Model):
+    nombre = models.CharField(max_length=50)
+
+class estatus(models.Model):
+    nombre = models.CharField(max_length=50)
+
+class tiposRam(models.Model):
+    nombre = models.CharField(max_length=50)
+
+class so(models.Model):
+    nombre = models.CharField(max_length=50)
