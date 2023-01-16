@@ -79,7 +79,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost",
+    "http://localhost:3000",
     "http://www.panel-it.com",
     "http://www.panel-it.com:3000",
     "http://172.17.245.162:3000",
@@ -87,7 +87,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ORIGIN_WHITELIST = [
-    "http://localhost",
+    "http://localhost:3000",
     "http://www.panel-it.com",
     "http://www.panel-it.com:3000",
     "http://172.17.245.162:3000",

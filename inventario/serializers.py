@@ -183,13 +183,10 @@ class EstadoSerializers(serializers.ModelSerializer):
     def to_representation(self, value):
         return {
             "id": value.id,
-            "estatus": value.estatu.nombre,
-            "asignacion": value.asignacion.nombre,
+            "estatus": value.estatu.id,
+            "asignacion": value.asignacion.id,
             "observacion": value.observacion,
-            "ubicaciones":{
-                "id": value.ubicaciones.id,
-                "nombre": value.ubicaciones.nombre
-            }
+            "ubicaciones": value.ubicaciones.id
         }
         
 class TiposRamSerializers(serializers.ModelSerializer):
@@ -202,7 +199,17 @@ class SoSerializers(serializers.ModelSerializer):
     class Meta:
         model = So
         fields = ('id','nombre')
-        
+
+class HistoricalRecordField(serializers.ModelSerializer):
+    #Creando el historial o la bitacora con la libreria de django-simple-history
+    def __init__(self, model, *args, fields='__all__', **kwargs):
+        self.Meta.model = model
+        self.Meta.fields = fields
+        super().__init__()
+
+    class Meta:
+        pass
+
 class EquipoSerializers(serializers.ModelSerializer):
     history = serializers.SerializerMethodField()
     so = serializers.PrimaryKeyRelatedField(queryset=So.objects.all(), many=False)
@@ -215,27 +222,15 @@ class EquipoSerializers(serializers.ModelSerializer):
 
     def create(self, validated_data):
         info = Estado.objects.create()
-        return Equipos.objects.create(id=info,  **validated_data)
+        return Equipos.objects.create(id=info, **validated_data)
 
     def to_representation(self, value):
         #Se fragmenta para que en una vista detallada se muestren todos los datos de equipo
         #Y en el otro solo unos especificos
         if(type(value) != type({})):
-            #Objeto que viene desde historicalrecordfield
-            model = value.history.__dict__['model']
-            fields = ['usuario_id']
-            serializer = HistoricalRecordField(model, value.history.all(), fields=fields, many=True)
-            serializer.is_valid()
-            #Se define una variable para luego devolverla en un bucle que va a recorrer todos los objetos del historial
-            def represetancion(x):
-                return {
-                    "nombre": x.usuario.nombre if x.usuario is not None else "S/N",
-                    "depatamento": x.usuario.departamentosEmpresas.departamentos.nombre if x.usuario is not None else "S/N",
-                    "observacion": x.id.observacion
-                }
-            historial = map(represetancion, serializer.initial_data)
             usuario = ''
             departamento = ''
+            cargo = ''
             #Operador ternario
             if(value.usuario is not None):
                 usuario = value.usuario.nombre
@@ -247,9 +242,12 @@ class EquipoSerializers(serializers.ModelSerializer):
             # return value.id.estatus
             return {
                 'informacion': {
+                    'estatus_id': value.id.estatu.id,
                     'estatus': value.id.estatu.nombre,
+                    'asignacion_id': value.id.asignacion.id,
                     'asignacion': value.id.asignacion.nombre,
                     'observacion': value.id.observacion,
+                    'ubicacion_id': value.id.ubicaciones.id,
                     'ubicacion': value.id.ubicaciones.nombre,
                 },
                 'id': value.id_id,
@@ -260,12 +258,14 @@ class EquipoSerializers(serializers.ModelSerializer):
                 'serial_unidad': value.serial_unidad,
                 'dd': value.dd,
                 'ram': value.ram,
+                'tipo_ram_id': value.tipo_ram.id,
                 'tipo_ram': value.tipo_ram.nombre,
                 'csb': value.csb,
                 'tipo_equipo': value.modelo.tiposEquiposMarcas.tiposEquipos.nombre,
                 'tipoEquipos_id': value.modelo.tiposEquiposMarcas.tiposEquipos.id,
                 'antivirus': value.antivirus,
                 'nombre': value.nombre,
+                'so_id': value.so.id,
                 'so': value.so.nombre,
                 'modelo': value.modelo.nombre,
                 'modelo_id': value.modelo.id,
@@ -273,8 +273,7 @@ class EquipoSerializers(serializers.ModelSerializer):
                 'marca_id': value.modelo.tiposEquiposMarcas.marcas.id,
                 'usuario': usuario,
                 'usuario_cargo': cargo,
-                'empresa_id': value.empresas.id if value.empresas is not None else "S/N",
-                'historial': historial
+                'empresa_id': value.empresas.id if value.empresas is not None else "S/N"
             }
         else:
             usuario = ''
@@ -296,16 +295,6 @@ class EquipoSerializers(serializers.ModelSerializer):
             "usuario": usuario,
             "departamento": departamento
         }
-
-class HistoricalRecordField(serializers.ModelSerializer):
-    #Creando el historial o la bitacora con la libreria de django-simple-history
-    def __init__(self, model, *args, fields='__all__', **kwargs):
-        self.Meta.model = model
-        self.Meta.fields = fields
-        super().__init__()
-
-    class Meta:
-        pass
 
 class HistorialSerializers(serializers.ModelSerializer):
     history = serializers.SerializerMethodField()
@@ -386,4 +375,33 @@ class DispositivoSerializers(serializers.ModelSerializer):
             "departamento": instance.asignado.usuarios.departamentosEmpresas.departamentos.nombre 
                             if instance.asignado is not None and instance.asignado.usuarios is not None
                             else "Sin asignar"
+        }
+
+class PowerBISerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Equipos
+        fields = '__all__'
+
+    def to_representation(self, value):
+        return {
+            "estatus": value.id.estatu.nombre,
+            "asignacion": value.id.asignacion.nombre,
+            "ubicacion": value.id.ubicaciones.nombre,
+            "obsercacion": value.id.observacion,
+            'id': value.id_id,
+            'serial': value.serial,
+            'serial_cargador': value.serial_cargador,
+            'serial_unidad': value.serial_unidad,
+            'dd': value.dd,
+            'ram': value.ram,
+            'tipo_ram': value.tipo_ram.nombre,
+            'csb': value.csb,
+            'tipo_equipo': value.modelo.tiposEquiposMarcas.tiposEquipos.nombre,
+            'antivirus': value.antivirus,
+            'nombre': value.nombre,
+            'so': value.so.nombre,
+            'modelo': value.modelo.nombre,
+            'marca': value.modelo.tiposEquiposMarcas.marcas.nombre,
+            'usuario': value.usuario.nombre if value.usuario is not None else "DISPONIBLE",
+            'empresa': value.empresas.nombre
         }

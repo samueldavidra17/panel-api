@@ -101,8 +101,6 @@ class Estado(models.Model):
     observacion = models.TextField(default="S/N")
 
     def save(self, *args, **kwargs):
-        self.estatus = self.estatus.upper()
-        self.asignacion = self.asignacion.upper()
         self.observacion = self.observacion.upper()
         super(Estado, self).save( *args, **kwargs)
 
@@ -115,6 +113,7 @@ class TiposRam(models.Model):
 
     class Meta:
         db_table = 'inventario_tipos_ram'
+
 class So(models.Model):
     nombre = models.CharField(max_length=50)
 
@@ -138,7 +137,7 @@ class Equipos(models.Model):
     antivirus = models.CharField(max_length=45, default="S/N", blank=True)
     usuario = models.ForeignKey(Usuarios, on_delete=models.CASCADE, related_name="usuarioEq", null=True, blank=True)
     #Para crear la bitacora o historial se usa esto, investigar para mayor información django-simple-history
-    history = HistoricalRecords()
+    history = HistoricalRecords(table_name='inventario_equipos_historial')
 
     def save(self, *args, **kwargs):
         self.antivirus = self.antivirus.upper()

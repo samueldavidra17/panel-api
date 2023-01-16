@@ -6,8 +6,6 @@
 -- Tiempo de generación: 10-01-2023 a las 19:17:42
 -- Versión del servidor: 10.4.24-MariaDB
 -- Versión de PHP: 8.1.6
-
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 
 
@@ -29,10 +27,10 @@ START TRANSACTION;
 -- Volcado de datos para la tabla inventario_departamentos
 --
 
--- INSERT INTO auth_user (id, password, last_login, is_superuser, username, first_name, last_name, email, is_staff, is_active, date_joined) VALUES
--- (1, 'pbkdf2_sha256$390000$z3kvw1NPc4GyhNyx2g3XeI$vU9zSGEmo7iUFxc121UTgEEIvlKH/XIFsJ5ymki5ics=', '2023-01-04 13:12:14.097981', true, 'daniela.sosa', 'Daniela Sosa', 'Analista de Soporte', 'daniela.sosa.bel@outlook.com', true, true, '2022-12-28 14:05:34.201744'),
--- (2, 'pbkdf2_sha256$390000$kQNcgeyxmWKcF7Hc496g80$WJdSTCqextwezbv8PrqKHsO9te7fQ+DNrvT4HDE5c38=', '2023-01-10 18:14:44.597799', true, 'julio.zambrano', 'Julio Zambrano', 'Especialista de Soporte', 'julio.zambrano.bel@outlook.com', true, true, '2023-01-02 20:08:59.293693'),
--- (3, 'pbkdf2_sha256$390000$rZQWHS4NK5O46xKBHoMUpZ$zDqmYukaXLG1DMGPhQErTCkqVbnpfRDgyXtubjWP9hM=', NULL, true, 'daniela.orellana', 'Daniela Orellana', 'Coordinadora de Soporte', 'daniela.orellana.bel@outlook.com', true, true, '2023-01-02 20:14:18.982867');
+INSERT INTO auth_user (id, password, last_login, is_superuser, username, first_name, last_name, email, is_staff, is_active, date_joined) VALUES
+(1, 'pbkdf2_sha256$390000$z3kvw1NPc4GyhNyx2g3XeI$vU9zSGEmo7iUFxc121UTgEEIvlKH/XIFsJ5ymki5ics=', '2023-01-04 13:12:14.097981', true, 'daniela.sosa', 'Daniela Sosa', 'Analista de Soporte', 'daniela.sosa.bel@outlook.com', true, true, '2022-12-28 14:05:34.201744'),
+(2, 'pbkdf2_sha256$390000$kQNcgeyxmWKcF7Hc496g80$WJdSTCqextwezbv8PrqKHsO9te7fQ+DNrvT4HDE5c38=', '2023-01-10 18:14:44.597799', true, 'julio.zambrano', 'Julio Zambrano', 'Especialista de Soporte', 'julio.zambrano.bel@outlook.com', true, true, '2023-01-02 20:08:59.293693'),
+(3, 'pbkdf2_sha256$390000$rZQWHS4NK5O46xKBHoMUpZ$zDqmYukaXLG1DMGPhQErTCkqVbnpfRDgyXtubjWP9hM=', NULL, true, 'daniela.orellana', 'Daniela Orellana', 'Coordinadora de Soporte', 'daniela.orellana.bel@outlook.com', true, true, '2023-01-02 20:14:18.982867');
 
 INSERT INTO inventario_departamentos (id, nombre) VALUES
 (1, 'ADMINISTRACION'),
@@ -3134,6 +3132,23 @@ INSERT INTO inventario_equipos (id_id, serial, serial_unidad, serial_cargador, c
 (885, 'LKFRH96', 'N/A', 'NO APLICA', '2091', 'SIN DISCO', 'SIN RAM', 1, 'S/N', 5, 'CENTRAL TELEFONICA', 9, 11, 639),
 (886, 'LKFNKC7', 'N/A', 'NO APLICA', '2460', 'SIN DISCO', '2GB', 1, 'S/N', 5, 'GIT002', 9, 17, 640),
 (887, '5CG2400MKN', 'N/A', 'WCNWC0ALB3ID07 - CSB5215', '5222', '120 GB', '4GB', 1, 'S/N', 4, 'APLCP1', 4, 44, 641);
+
+SELECT setval('auth_user_id_seq', (SELECT max(id) FROM auth_user));
+SELECT setval('inventario_asignaciones_id_seq', (SELECT max(id) FROM inventario_asignaciones));
+SELECT setval('inventario_departamentos_empresas_id_seq', (SELECT max(id) FROM inventario_departamentos_empresas));
+SELECT setval('inventario_departamentos_id_seq', (SELECT max(id) FROM inventario_departamentos));
+SELECT setval('inventario_empresas_id_seq', (SELECT max(id) FROM inventario_empresas));
+SELECT setval('inventario_dispositivos_id_seq', (SELECT max(id) FROM inventario_dispositivos));
+SELECT setval('inventario_estado_id_seq', (SELECT max(id) FROM inventario_estado));
+SELECT setval('inventario_estatus_id_seq', (SELECT max(id) FROM inventario_estatus));
+SELECT setval('inventario_marcas_id_seq', (SELECT max(id) FROM inventario_marcas));
+SELECT setval('inventario_modelos_id_seq', (SELECT max(id) FROM inventario_modelos));
+SELECT setval('inventario_so_id_seq', (SELECT max(id) FROM inventario_so));
+SELECT setval('inventario_tipos_equipos_marcas_id_seq', (SELECT max(id) FROM inventario_tipos_equipos_marcas));
+SELECT setval('inventario_tipos_ram_id_seq', (SELECT max(id) FROM inventario_tipos_ram));
+SELECT setval('inventario_ubicaciones_id_seq', (SELECT max(id) FROM inventario_ubicaciones));
+SELECT setval('inventario_usuarios_id_seq', (SELECT max(id) FROM inventario_usuarios));
+SELECT setval('inventario_historicalequipos_history_id_seq', (SELECT max(history_id) FROM inventario_equipos_historial));
 
 COMMIT;
 

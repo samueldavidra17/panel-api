@@ -23,7 +23,8 @@ router.register('asignaciones', AsignacionesViewSet, 'asignaciones')
 router.register('tiposram', TiposRamViewSet, 'tiposram')
 router.register('estatus', EstatusViewSet, 'estatus')
 router.register('sistemasoperativos', SoViewSet, 'so')
-router.register('combox', TextComboxApi, 'combox')
+router.register('combox', ComboxApi, 'combox')
+router.register('powerbi', PowerBIApi, 'powerbi')
 #urls que vienen directamente de django-rest-knox
 urlpatterns = [
     path('register/', RegisterAPI.as_view(), name='register'),

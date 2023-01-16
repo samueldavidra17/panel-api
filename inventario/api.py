@@ -133,7 +133,7 @@ class SoViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = SoSerializers
 
-class EquiposViewSet(viewsets.ModelViewSet, GenericAPIView):
+class EquiposViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = EquipoSerializers
     filter_backends = [filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend]
@@ -146,17 +146,17 @@ class EquiposViewSet(viewsets.ModelViewSet, GenericAPIView):
         return queryset
 
     def partial_update(self, request, *args, **kwargs):
-        print("patch")
         equipo = self.get_object()
         data = request.data
         try:
-            usuario = Usuarios.objects.get(pk=data["usuarios"])
-            equipo.usuarios = usuario
+            print(data)
+            usuario = Usuarios.objects.get(pk=data["usuario"])
+            equipo.usuario = usuario
+            equipo.save()
+            serializer = EquipoSerializers(equipo)
+            return Response(serializer.data)
         except KeyError:
             pass 
-        equipo.save()
-        serializer = EquipoSerializers(equipo)
-        return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
         equipo = self.get_object()
@@ -228,7 +228,7 @@ class DispositivosViewSet(viewsets.ModelViewSet):
     search_fields = ["modelos__tiposEquiposMarcas_id__tiposEquipos_id__nombre"]
 
 #ObjectMultipleModel viene de una libreria llamada multiple model 
-class TextComboxApi(ObjectMultipleModelAPIViewSet):
+class ComboxApi(ObjectMultipleModelAPIViewSet):
     permission_classes = [permissions.IsAuthenticated]
     def get_querylist(self):
         querylist = (
@@ -238,3 +238,11 @@ class TextComboxApi(ObjectMultipleModelAPIViewSet):
             {'queryset': So.objects.all(), 'serializer_class': SoSerializers},
         )
         return querylist
+
+class PowerBIApi(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def list(self, request):
+        queryset = Equipos.objects.all()
+        serializer = PowerBISerializers(queryset, many=True)
+        return Response(serializer.data)
