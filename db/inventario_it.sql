@@ -26,7 +26,7 @@ START TRANSACTION;
 -- Volcado de datos para la tabla django_content_type
 --
 --
--- Volcado de datos para la tabla it_departamentos
+-- Volcado de datos para la tabla inventario_departamentos
 --
 
 -- INSERT INTO auth_user (id, password, last_login, is_superuser, username, first_name, last_name, email, is_staff, is_active, date_joined) VALUES
@@ -34,7 +34,7 @@ START TRANSACTION;
 -- (2, 'pbkdf2_sha256$390000$kQNcgeyxmWKcF7Hc496g80$WJdSTCqextwezbv8PrqKHsO9te7fQ+DNrvT4HDE5c38=', '2023-01-10 18:14:44.597799', true, 'julio.zambrano', 'Julio Zambrano', 'Especialista de Soporte', 'julio.zambrano.bel@outlook.com', true, true, '2023-01-02 20:08:59.293693'),
 -- (3, 'pbkdf2_sha256$390000$rZQWHS4NK5O46xKBHoMUpZ$zDqmYukaXLG1DMGPhQErTCkqVbnpfRDgyXtubjWP9hM=', NULL, true, 'daniela.orellana', 'Daniela Orellana', 'Coordinadora de Soporte', 'daniela.orellana.bel@outlook.com', true, true, '2023-01-02 20:14:18.982867');
 
-INSERT INTO it_departamentos (id, nombre) VALUES
+INSERT INTO inventario_departamentos (id, nombre) VALUES
 (1, 'ADMINISTRACION'),
 (2, 'IT'),
 (3, 'OPERACIONES'),
@@ -115,10 +115,10 @@ INSERT INTO it_departamentos (id, nombre) VALUES
 (78, 'PROMOCIONES LOS LEONES');
 
 --
--- Volcado de datos para la tabla it_departamentos_empresas
+-- Volcado de datos para la tabla inventario_departamentos_empresas
 --
 
-INSERT INTO it_empresas (id, nombre) VALUES
+INSERT INTO inventario_empresas (id, nombre) VALUES
 (1, 'AGROBEL'),
 (2, 'AGROPECUARIAS'),
 (3, 'VENETRANSPORTE'),
@@ -149,7 +149,7 @@ INSERT INTO it_empresas (id, nombre) VALUES
 (28, 'VENEPRIMA'),
 (29, 'VENEVENTAS LATINA');
 
-INSERT INTO it_departamentos_empresas (id, departamentos_id, empresas_id) VALUES
+INSERT INTO inventario_departamentos_empresas (id, departamentos_id, empresas_id) VALUES
 (1, 1, 1),
 (2, 2, 1),
 (3, 3, 1),
@@ -409,7 +409,7 @@ INSERT INTO it_departamentos_empresas (id, departamentos_id, empresas_id) VALUES
 (257, 78, 29);
 
 
-INSERT INTO it_marcas (id, nombre) VALUES
+INSERT INTO inventario_marcas (id, nombre) VALUES
 (1, 'LENOVO'),
 (2, 'SIRAGON'),
 (3, 'VIT'),
@@ -429,10 +429,10 @@ INSERT INTO it_marcas (id, nombre) VALUES
 (17, 'VIT MOUSE'),
 (18, 'CARGADORES');
 --
--- Volcado de datos para la tabla it_tipos_equipos
+-- Volcado de datos para la tabla inventario_tipos_equipos
 --
 
-INSERT INTO it_tipos_equipos (id, nombre) VALUES
+INSERT INTO inventario_tipos_equipos (id, nombre) VALUES
 ('D-1', 'CARGADOR'),
 ('D-2', 'DISCO DURO'),
 ('D-3', 'MOUSE'),
@@ -447,7 +447,7 @@ INSERT INTO it_tipos_equipos (id, nombre) VALUES
 ('I-1', 'IMPRESORAS'),
 ('I-2', 'FOTOCOPIADORA');
 
-INSERT INTO it_tipos_equipos_marcas (id, marcas_id, "tiposEquipos_id") VALUES
+INSERT INTO inventario_tipos_equipos_marcas (id, marcas_id, "tiposEquipos_id") VALUES
 (1, 1, 'E-2'),
 (2, 1, 'E-1'),
 (3, 2, 'E-1'),
@@ -477,7 +477,7 @@ INSERT INTO it_tipos_equipos_marcas (id, marcas_id, "tiposEquipos_id") VALUES
 (27, 17, 'D-3'),
 (28, 18, 'D-1');
 
-INSERT INTO it_modelos (id, nombre, "tiposEquiposMarcas_id") VALUES
+INSERT INTO inventario_modelos (id, nombre, "tiposEquiposMarcas_id") VALUES
 (1, '8215-35S', 1),
 (2, '9632-Q2S', 1),
 (3, 'L450', 2),
@@ -604,7 +604,7 @@ INSERT INTO it_modelos (id, nombre, "tiposEquiposMarcas_id") VALUES
 (124, 'MG-0971', 27),
 (125, 'PRUEBA1', 28);
 
-INSERT INTO it_ubicaciones (id, nombre) VALUES
+INSERT INTO inventario_ubicaciones (id, nombre) VALUES
 (1, 'AGROBEL'),
 (2, 'TORRE BEL'),
 (3, 'DATA CENTER'),
@@ -636,7 +636,7 @@ INSERT INTO it_ubicaciones (id, nombre) VALUES
 (29, 'PANAMA');
 
 
-INSERT INTO it_asignaciones (id, nombre) VALUES
+INSERT INTO inventario_asignaciones (id, nombre) VALUES
 (1, 'DAÑADA'),
 (2, 'ASIGNADA'),
 (3, 'POR ASIGNAR'),
@@ -650,7 +650,7 @@ INSERT INTO it_asignaciones (id, nombre) VALUES
 -- Volcado de datos para la tabla json_estatus
 --
 
-INSERT INTO it_estatus (id, nombre) VALUES
+INSERT INTO inventario_estatus (id, nombre) VALUES
 (1, 'INOPERATIVA'),
 (2, 'OPERATIVA'),
 (3, 'DESINCORPORADO'),
@@ -661,7 +661,7 @@ INSERT INTO it_estatus (id, nombre) VALUES
 -- Volcado de datos para la tabla json_so
 --
 
-INSERT INTO it_so (id, nombre) VALUES
+INSERT INTO inventario_so (id, nombre) VALUES
 (1, 'DEBIAN'),
 (2, 'MICROSOFT WINDOWS 7'),
 (3, 'MICROSOFT WINDOWS 10 PRO'),
@@ -680,11 +680,11 @@ INSERT INTO it_so (id, nombre) VALUES
 (16, 'WINDOWS SERVER 2012'),
 (17, 'MICROSOFT WINDOWS SERVER 2018');
 
---
+--  
 -- Volcado de datos para la tabla json_tiposram
 --
 
-INSERT INTO it_tiposram (id, nombre) VALUES
+INSERT INTO inventario_tipos_ram (id, nombre) VALUES
 (1, 'DDR'),
 (2, 'DDR2'),
 (3, 'DDR3'),
@@ -693,10 +693,10 @@ INSERT INTO it_tiposram (id, nombre) VALUES
 (6, 'FIJA'),
 (7, 'S/I');
 --
--- Volcado de datos para la tabla it_usuarios
+-- Volcado de datos para la tabla inventario_usuarios
 --
 
-INSERT INTO it_usuarios (id, nombre, cargo, "departamentosEmpresas_id") VALUES
+INSERT INTO inventario_usuarios (id, nombre, cargo, "departamentosEmpresas_id") VALUES
 (1, 'DISPONIBLE', 'S/N', 86),
 (2, 'ISA ALBARRAN', 'JEFE DE ADMINISTRACIÓN', 1),
 (3, 'YOMAIRA GARCÍA', 'COORDINADOR DE SERVICIO -', 1),
@@ -1344,9 +1344,9 @@ INSERT INTO it_usuarios (id, nombre, cargo, "departamentosEmpresas_id") VALUES
 (645, 'ROSSIMAR HERNANDEZ', 'ESPECIALISTA DE DOCUMENTACION Y PROCESOS', 92);
 
 --
--- Volcado de datos para la tabla it_empresas
+-- Volcado de datos para la tabla inventario_empresas
 --
-INSERT INTO it_estado (id, estatu_id, asignacion_id, observacion, ubicaciones_id) VALUES
+INSERT INTO inventario_estado (id, estatu_id, asignacion_id, observacion, ubicaciones_id) VALUES
 (1, 1, 1, 'S/N', 1),
 (2, 1, 1, 'S/N', 1),
 (3, 2, 2, 'CARGADOR CSB7003', 1),
@@ -2236,15 +2236,15 @@ INSERT INTO it_estado (id, estatu_id, asignacion_id, observacion, ubicaciones_id
 (887, 2, 2, 'CARGADOR HP', 16);
 
 --
--- Volcado de datos para la tabla it_marcas
+-- Volcado de datos para la tabla inventario_marcas
 --
 --
 -- Volcado de datos para la tabla json_asignaciones
 --
 --
--- Volcado de datos para la tabla it_equipos
+-- Volcado de datos para la tabla inventario_equipos
 --
-INSERT INTO it_equipos (id_id, serial, serial_unidad, serial_cargador, csb, dd, ram, tipo_ram_id, antivirus, so_id, nombre, empresas_id, modelo_id, usuario_id) VALUES
+INSERT INTO inventario_equipos (id_id, serial, serial_unidad, serial_cargador, csb, dd, ram, tipo_ram_id, antivirus, so_id, nombre, empresas_id, modelo_id, usuario_id) VALUES
 (1, 'LKADD43', 'NO TIENE', 'NO APLICA', 'S/N', '80GB', '2GB', 1, 'S/N', 2, 'TTB012', 1, 1, 1),
 (2, 'LKBBHCA', 'NO TIENE', 'NO APLICA', 'S/N', '80GB', '2GB', 1, 'S/N', 2, 'TTB011', 1, 2, 1),
 (3, 'PF-0IRGBX', 'NO TIENE', '8SSA10J20161C2SG93J0X9R', '7002', '250GB', '8GB', 1, 'S/N', 3, 'AGB010', 1, 3, 2),
@@ -2687,7 +2687,7 @@ INSERT INTO it_equipos (id_id, serial, serial_unidad, serial_cargador, csb, dd, 
 (440, 'LKFNHY5', 'PIL-CMP-024', 'NO APLICA', '04003', '80GB', '2GB', 1, 'S/N', 4, 'CFZ005', 9, 17, 1),
 (441, 'W87032ZBVUX', 'CIM-CMP-0028', 'NO APLICA', '3817', 'SIN DISCO', 'SIN RAM', 1, 'S/N', 12, 'POR DEFINIR', 11, 71, 330),
 (442, 'C02NG4B5FY11', 'NO TIENE', 'NO APLICA', '6275', 'SIN DISCO', 'SIN RAM', 1, 'S/N', 12, 'CMB006', 11, 72, 331);
-INSERT INTO it_equipos (id_id, serial, serial_unidad, serial_cargador, csb, dd, ram, tipo_ram_id, antivirus, so_id, nombre, empresas_id, modelo_id, usuario_id) VALUES
+INSERT INTO inventario_equipos (id_id, serial, serial_unidad, serial_cargador, csb, dd, ram, tipo_ram_id, antivirus, so_id, nombre, empresas_id, modelo_id, usuario_id) VALUES
 (443, 'C02NG4Q5FY11', 'NO TIENE', 'NO APLICA', '6230', 'SIN DISCO', 'SIN RAM', 1, 'S/N', 12, 'CMB007', 11, 72, 332),
 (444, 'LKFRH67', 'CIM-CMP-006', 'NO APLICA', '04202', '80GB', '3GB', 1, 'S/N', 13, 'CMB007-1', 11, 10, 333),
 (445, 'A000972864', 'PIL-CMP-168', 'NO APLICA', '5530', '500GB', '2GB', 1, 'S/N', 4, 'CFZ021', 9, 19, 334),
@@ -3128,7 +3128,7 @@ INSERT INTO it_equipos (id_id, serial, serial_unidad, serial_cargador, csb, dd, 
 (880, 'A001028417', 'VVL-CMP-0010', '6BCW58300ER', '7527', '500GB', '4GB', 1, 'S/N', 4, 'VLB011', 29, 5, 383),
 (881, 'A001028985', 'POR DEFINIR', '6BCW58T00XL - CSB7346', '7345', '500GB', '2GB', 1, 'S/N', 4, 'VLB015', 29, 5, 636),
 (882, 'A001030891', 'VVL-CMP-0009', '6BCW58T002H', '5481', '500GB', '2GB', 1, 'S/N', 2, 'VLB012', 29, 5, 637);
-INSERT INTO it_equipos (id_id, serial, serial_unidad, serial_cargador, csb, dd, ram, tipo_ram_id, antivirus, so_id, nombre, empresas_id, modelo_id, usuario_id) VALUES
+INSERT INTO inventario_equipos (id_id, serial, serial_unidad, serial_cargador, csb, dd, ram, tipo_ram_id, antivirus, so_id, nombre, empresas_id, modelo_id, usuario_id) VALUES
 (883, 'A001029086', 'VVL-CMP-0008', '6BCW58301UG - CSB7577', '7576', '500GB', '8GB', 1, 'S/N', 4, 'VLB016', 29, 5, 638),
 (884, 'OKD882', 'POR DEFINIR', 'ODF263-71615-6695B12', '01247', '80GB', '1GB', 1, 'S/N', 5, 'ABBANP', 2, 122, 269),
 (885, 'LKFRH96', 'N/A', 'NO APLICA', '2091', 'SIN DISCO', 'SIN RAM', 1, 'S/N', 5, 'CENTRAL TELEFONICA', 9, 11, 639),

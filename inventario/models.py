@@ -27,7 +27,7 @@ class DepartamentosEmpresas(models.Model):
     empresas = models.ForeignKey(Empresas, on_delete=models.CASCADE, related_name="departamentosId", null=False)
 
     class Meta:
-        db_table = 'it_departamentos_empresas'
+        db_table = 'inventario_departamentos_empresas'
         
 class Usuarios(models.Model):
     nombre = models.CharField(max_length=45)
@@ -52,7 +52,7 @@ class TiposEquipos(models.Model):
     marcas = models.ManyToManyField(Marcas, related_name="tiposEquiposMarcas", through="TiposEquiposMarcas")
 
     class Meta:
-        db_table = 'it_tipos_equipos'
+        db_table = 'inventario_tipos_equipos'
 
     def save(self, *args, **kwargs):
         self.nombre = self.nombre.upper()
@@ -63,7 +63,7 @@ class TiposEquiposMarcas(models.Model):
     tiposEquipos = models.ForeignKey(TiposEquipos, on_delete=models.CASCADE, related_name="tiposEquiposId", null="True")
 
     class Meta:
-        db_table = 'it_tipos_equipos_marcas'
+        db_table = 'inventario_tipos_equipos_marcas'
 
 class Modelos(models.Model):
     nombre = models.CharField(max_length=45)
@@ -113,6 +113,8 @@ class TiposRam(models.Model):
         self.nombre = self.nombre.upper()
         super(TiposRam, self).save( *args, **kwargs)
 
+    class Meta:
+        db_table = 'inventario_tipos_ram'
 class So(models.Model):
     nombre = models.CharField(max_length=50)
 
