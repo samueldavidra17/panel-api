@@ -1,5 +1,5 @@
-from .models import empresas, marcas, tipos_equipos, departamentos, ubicaciones, usuarios, informacion, modelos, equipos, impresoras, dispositivos, asignaciones, tiposRam, so, estatus
-from .serializers import tipos_equiposSerializers, LoginSerializer, equiposSerializers, impresorasSerializers, dispositivosSerializers, modelosSerializers, marcasSerializers, informacionSerializers, ubicacionesSerializers, usuariosSerializers, departamentoSerializers, empresasSerializers, historialSerializers, UserSerializer, RegisterSerializer, asignacionesSerializers, estatusSerializers, tiposRamSerializers, soSerializers, asignacionesMinSerializers, estatusMinSerializers, tiposRamMinSerializers, soMinSerializers
+from .models import *
+from .serializers import *
 from rest_framework import viewsets, permissions, filters, generics
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -56,62 +56,93 @@ class StandardResultsSetPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 1000
 
-#ObjectMultipleModel viene de una libreria llamada multiple model 
-class TextComboxApi(ObjectMultipleModelAPIViewSet):
+class EmpresasViewSet(viewsets.ModelViewSet):
+    queryset = Empresas.objects.all()
     permission_classes = [permissions.IsAuthenticated]
-    def get_querylist(self):
-        querylist = (
-            {'queryset': asignaciones.objects.all(), 'serializer_class': asignacionesMinSerializers},
-            {'queryset': estatus.objects.all(), 'serializer_class': estatusMinSerializers},
-            {'queryset': tiposRam.objects.all(), 'serializer_class': tiposRamMinSerializers},
-            {'queryset': so.objects.all(), 'serializer_class': soMinSerializers},
-        )
-        return querylist
+    serializer_class = EmpresasSerializers    
+    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
+    filterset_fields = ['id']
 
-class asignacionesViewSet(viewsets.ModelViewSet):
-    queryset = asignaciones.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = asignacionesSerializers
+class DepartamentosViewSet(viewsets.ModelViewSet):
+    queryset = Departamentos.objects.all()
+    permission_classes = [permissions.IsAuthenticated] 
+    serializer_class = DepartamentoSerializers
+    filter_backends = [filters.SearchFilter,django_filters.rest_framework.DjangoFilterBackend]
+    search_fields = []
+    filterset_fields = ['empresas']
 
-class tiposRamViewSet(viewsets.ModelViewSet):
-    queryset = tiposRam.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = tiposRamSerializers
+class UsuariosViewSet(viewsets.ModelViewSet):
+    queryset = Usuarios.objects.all()
+    permission_classes = [permissions.IsAuthenticated] 
+    serializer_class = UsuarioSerializers
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['nombre']    
 
-class estatusViewSet(viewsets.ModelViewSet):
-    queryset = estatus.objects.all()
+class TiposEquiposViewSet(viewsets.ModelViewSet):
+    queryset = TiposEquipos.objects.all()
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = estatusSerializers
-
-class soViewSet(viewsets.ModelViewSet):
-    queryset = so.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = soSerializers
-
-class tipos_equiposViewSet(viewsets.ModelViewSet):
-    queryset = tipos_equipos.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = tipos_equiposSerializers
+    serializer_class = TiposEquipoSerializers
     filter_backends = [filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend]
     filterset_fields = ['marcas']
     search_fields = ['id']
 
-class historialEquiposViewSet(viewsets.ModelViewSet):
-    queryset = equipos.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = historialSerializers
+class MarcasViewSet(viewsets.ModelViewSet):
+    queryset = Marcas.objects.all()
+    permission_classes = [permissions.IsAuthenticated] 
+    serializer_class = MarcaSerializers
+    filter_backends = [filters.SearchFilter,django_filters.rest_framework.DjangoFilterBackend]
+    filterset_fields = ['tiposEquiposMarcas']
+    search_fields = ['tiposEquiposMarcas__id']
 
-class equiposViewSet(viewsets.ModelViewSet, GenericAPIView):
+class ModelosViewSet(viewsets.ModelViewSet):
+    queryset = Modelos.objects.all()
+    serializer_class = ModeloSerializers
+    permission_classes = [permissions.IsAuthenticated] 
+    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
+    filterset_fields = ['id','nombre','tiposEquiposMarcas_id__tiposEquipos_id', 'tiposEquiposMarcas_id__marcas_id']
+
+class UbicacionesViewSet(viewsets.ModelViewSet):
+    queryset = Ubicaciones.objects.all()
+    permission_classes = [permissions.IsAuthenticated] 
+    serializer_class = UbicacioneSerializers
+
+class AsignacionesViewSet(viewsets.ModelViewSet):
+    queryset = Asignaciones.objects.all()
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = equiposSerializers
+    serializer_class = AsignacioneSerializers
+
+class EstatusViewSet(viewsets.ModelViewSet):
+    queryset = Estatus.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = EstatuSerializers
+
+class EstadosViewSet(viewsets.ModelViewSet):
+    queryset = Estado.objects.all()
+    permission_classes = [permissions.IsAuthenticated] 
+    serializer_class = EstadoSerializers
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['asignacion']
+
+class TiposRamViewSet(viewsets.ModelViewSet):
+    queryset = TiposRam.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = TiposRamSerializers
+
+class SoViewSet(viewsets.ModelViewSet):
+    queryset = So.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = SoSerializers
+
+class EquiposViewSet(viewsets.ModelViewSet, GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = EquipoSerializers
     filter_backends = [filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend]
-    search_fields = ['serial','serial_cargador','serial_unidad','dd','ram','tipo_ram','csb','antivirus','usuario_so','so']
-    filterset_fields = ['usuarios_id']
+    search_fields = ['serial','serial_cargador','serial_unidad','dd','ram','tipo_ram','csb','antivirus','nombre','so']
+    filterset_fields = ['usuario_id']
 
-        
     ### get_queryset sirve para traer todos los objetos de equipo y retornarlos###
     def get_queryset(self):
-        queryset = equipos.objects.all()
+        queryset = Equipos.objects.all()
         return queryset
 
     def partial_update(self, request, *args, **kwargs):
@@ -119,16 +150,15 @@ class equiposViewSet(viewsets.ModelViewSet, GenericAPIView):
         equipo = self.get_object()
         data = request.data
         try:
-            usuario = usuarios.objects.get(pk=data["usuarios"])
+            usuario = Usuarios.objects.get(pk=data["usuarios"])
             equipo.usuarios = usuario
         except KeyError:
             pass 
         equipo.save()
-        serializer = equiposSerializers(equipo)
+        serializer = EquipoSerializers(equipo)
         return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
-        print("update")
         equipo = self.get_object()
         data = request.data
         
@@ -140,23 +170,22 @@ class equiposViewSet(viewsets.ModelViewSet, GenericAPIView):
         equipo.dd = data.get("dd", equipo.dd)
         equipo.ram = data.get("ram", equipo.ram)
         equipo.tipo_ram = data.get("tipo_ram", equipo.tipo_ram)
-        equipo.usuario_so = data.get("usuario_so", equipo.usuario_so)
+        equipo.nombre = data.get("nombre", equipo.nombre)
         equipo.antivirus = data.get("antivirus", equipo.antivirus)
 
         equipo.save_without_history()
-        serializer = equiposSerializers(equipo)    
+        serializer = EquipoSerializers(equipo)    
         return Response(serializer.data)
 
     def list(self, request):
-        queryset = equipos.objects.values('id','empresas_id__nombre','id__ubicaciones__nombre',
-        'serial','csb','usuario_so','modelos_id__nombre',
-        'modelos_id__tiposEquiposMarcas_id__marcas_id__nombre', 'usuarios_id',
-        'usuarios_id__nombre', 
-        'usuarios_id__departamentosEmpresas_id__departamentos_id__nombre',
-        'modelos_id__tiposEquiposMarcas_id__tiposEquipos_id__nombre',
+        queryset = Equipos.objects.values('id','empresas_id__nombre','id__ubicaciones__nombre',
+        'serial','csb','nombre','modelo_id__nombre',
+        'modelo_id__tiposEquiposMarcas_id__marcas_id__nombre', 'usuario_id',
+        'usuario_id__nombre', 
+        'usuario_id__departamentosEmpresas_id__departamentos_id__nombre',
+        'modelo_id__tiposEquiposMarcas_id__tiposEquipos_id__nombre',
         'empresas_id__id')
         search = request.query_params.get('search', None)
-
         ###Filtros hechos a mano donde startwith se refiere a la letra inicial###
         if search:
             queryset=queryset.filter(
@@ -164,82 +193,48 @@ class equiposViewSet(viewsets.ModelViewSet, GenericAPIView):
             Q(empresas_id__nombre__startswith = search.upper()) |
             Q(id__ubicaciones__nombre__startswith = search.upper()) |
             Q(csb__startswith = search.upper()) |
-            Q(usuario_so__startswith = search.upper()) |
-            Q(modelos_id__nombre__startswith = search.upper()) |
-            Q(modelos_id__tiposEquiposMarcas_id__marcas_id__nombre__startswith = search.upper()) |
-            Q(usuarios_id__nombre__startswith = search.upper()) 
+            Q(nombre__startswith = search.upper()) |
+            Q(modelo_id__nombre__startswith = search.upper()) |
+            Q(modelo_id__tiposEquiposMarcas_id__marcas_id__nombre__startswith = search.upper()) |
+            Q(usuario_id__nombre__startswith = search.upper()) 
             ) 
 
 
         ###Paginacion###
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = equiposSerializers(page, many=True)
+            serializer = EquipoSerializers(page, many=True)
             return self.get_paginated_response(serializer.data)
-        serializer = equiposSerializers(queryset, many=True)
+        serializer = EquipoSerializers(queryset, many=True)
         return Response(serializer.data)
 
-class impresorasViewSet(viewsets.ModelViewSet):
-    queryset = impresoras.objects.all()
+class HistorialEquiposViewSet(viewsets.ModelViewSet):
+    queryset = Equipos.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = HistorialSerializers
+
+class ImpresorasViewSet(viewsets.ModelViewSet):
+    queryset = Impresoras.objects.all()
     permission_classes = [permissions.IsAuthenticated | IsUser]
-    serializer_class = impresorasSerializers
+    serializer_class = ImpresoraSerializers
     filter_backends = [filters.SearchFilter]
     search_fields = []
 
-class dispositivosViewSet(viewsets.ModelViewSet):
-    queryset = dispositivos.objects.all()
+class DispositivosViewSet(viewsets.ModelViewSet):
+    queryset = Dispositivos.objects.all()
     permission_classes = [permissions.IsAuthenticated] 
-    serializer_class = dispositivosSerializers
+    serializer_class = DispositivoSerializers
     filter_backends = [filters.SearchFilter]
     search_fields = ["modelos__tiposEquiposMarcas_id__tiposEquipos_id__nombre"]
 
-
-class modelosViewSet(viewsets.ModelViewSet):
-    queryset = modelos.objects.all()
-    serializer_class = modelosSerializers
-    permission_classes = [permissions.IsAuthenticated] 
-    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
-    filterset_fields = ['id','nombre','tiposEquiposMarcas_id__tiposEquipos_id', 'tiposEquiposMarcas_id__marcas_id']
-    
-
-class marcasViewSet(viewsets.ModelViewSet):
-    queryset = marcas.objects.all()
-    permission_classes = [permissions.IsAuthenticated] 
-    serializer_class = marcasSerializers
-    filter_backends = [filters.SearchFilter,django_filters.rest_framework.DjangoFilterBackend]
-    filterset_fields = ['tiposEquiposMarcas']
-    search_fields = ['tiposEquiposMarcas__id']
-
-class informacionViewSet(viewsets.ModelViewSet):
-    queryset = informacion.objects.all()
-    permission_classes = [permissions.IsAuthenticated] 
-    serializer_class = informacionSerializers
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['asignacion']
-
-class ubicacionesViewSet(viewsets.ModelViewSet):
-    queryset = ubicaciones.objects.all()
-    permission_classes = [permissions.IsAuthenticated] 
-    serializer_class = ubicacionesSerializers
-
-class usuariosViewSet(viewsets.ModelViewSet):
-    queryset = usuarios.objects.all()
-    permission_classes = [permissions.IsAuthenticated] 
-    serializer_class = usuariosSerializers
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['nombre']
-
-class departamentosViewSet(viewsets.ModelViewSet):
-    queryset = departamentos.objects.all()
-    permission_classes = [permissions.IsAuthenticated] 
-    serializer_class = departamentoSerializers
-    filter_backends = [filters.SearchFilter,django_filters.rest_framework.DjangoFilterBackend]
-    search_fields = []
-    filterset_fields = ['empresas']
-
-class empresasViewSet(viewsets.ModelViewSet):
-    queryset = empresas.objects.all()
+#ObjectMultipleModel viene de una libreria llamada multiple model 
+class TextComboxApi(ObjectMultipleModelAPIViewSet):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = empresasSerializers    
-    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
-    filterset_fields = ['id']
+    def get_querylist(self):
+        querylist = (
+            {'queryset': Asignaciones.objects.all(), 'serializer_class': AsignacioneSerializers},
+            {'queryset': Estatus.objects.all(), 'serializer_class': EstatuSerializers},
+            {'queryset': TiposRam.objects.all(), 'serializer_class': TiposRamSerializers},
+            {'queryset': So.objects.all(), 'serializer_class': SoSerializers},
+        )
+        return querylist

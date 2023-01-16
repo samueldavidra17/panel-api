@@ -18,6 +18,7 @@ mysqlclient==2.1.1
 pefile==2022.5.30
 platformdirs==2.5.2
 psutil==5.9.2
+psycopg2==2.9.5
 pycparser==2.21
 pyinstaller==5.6.2
 pyinstaller-hooks-contrib==2022.13

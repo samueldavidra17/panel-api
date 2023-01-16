@@ -1,5 +1,5 @@
 from rest_framework import routers
-from .api import tipos_equiposViewSet, dispositivosViewSet, empresasViewSet, departamentosViewSet, usuariosViewSet, ubicacionesViewSet, informacionViewSet, marcasViewSet, modelosViewSet, impresorasViewSet, equiposViewSet, asignacionesViewSet, tiposRamViewSet, estatusViewSet, soViewSet, TextComboxApi, historialEquiposViewSet, RegisterAPI, LoginAPI
+from .api import *
 from knox import views as knox_views
 from django.urls import path
 
@@ -7,29 +7,29 @@ from django.urls import path
 #El default router crea una vista para así visualizar como va la apí
 router = routers.DefaultRouter()
 
-router.register('api/tiposequipos', tipos_equiposViewSet , 'tipos_equipos')
-router.register('api/empresas', empresasViewSet , 'empresas')
-router.register('api/departamentos', departamentosViewSet , 'departamentos')
-router.register('api/usuarios', usuariosViewSet , 'usuarios')
-router.register('api/ubicaciones', ubicacionesViewSet , 'ubicaciones')
-router.register('api/informacion', informacionViewSet , 'informacion')
-router.register('api/marcas', marcasViewSet , 'marcas')
-router.register('api/modelos', modelosViewSet , 'modelos')
-router.register('api/dispositivos', dispositivosViewSet , 'dispositivos')
-router.register('api/impresoras', impresorasViewSet , 'impresoras')
-router.register('api/equipos', equiposViewSet, 'equipos')
-router.register('api/historialequipos', historialEquiposViewSet, 'historialEquipos')
-router.register('api/asignaciones', asignacionesViewSet, 'asignaciones')
-router.register('api/tiposram', tiposRamViewSet, 'tiposram')
-router.register('api/estatus', estatusViewSet, 'estatus')
-router.register('api/sistemasoperativos', soViewSet, 'so')
-router.register('api/combox', TextComboxApi, 'combox')
+router.register('tiposequipos', TiposEquiposViewSet , 'tipos_equipos')
+router.register('empresas', EmpresasViewSet , 'empresas')
+router.register('departamentos', DepartamentosViewSet , 'departamentos')
+router.register('usuarios', UsuariosViewSet , 'usuarios')
+router.register('ubicaciones', UbicacionesViewSet , 'ubicaciones')
+router.register('informacion', EstadosViewSet , 'informacion')
+router.register('marcas', MarcasViewSet , 'marcas')
+router.register('modelos', ModelosViewSet , 'modelos')
+router.register('dispositivos', DispositivosViewSet , 'dispositivos')
+router.register('impresoras', ImpresorasViewSet , 'impresoras')
+router.register('equipos', EquiposViewSet, 'equipos')
+router.register('historialequipos', HistorialEquiposViewSet, 'historialEquipos')
+router.register('asignaciones', AsignacionesViewSet, 'asignaciones')
+router.register('tiposram', TiposRamViewSet, 'tiposram')
+router.register('estatus', EstatusViewSet, 'estatus')
+router.register('sistemasoperativos', SoViewSet, 'so')
+router.register('combox', TextComboxApi, 'combox')
 #urls que vienen directamente de django-rest-knox
 urlpatterns = [
-    path('api/register/', RegisterAPI.as_view(), name='register'),
-    path('api/login/', LoginAPI.as_view(), name='login'),
-    path('api/logout/', knox_views.LogoutView.as_view(), name='logout'),
-    path('api/logoutall/', knox_views.LogoutAllView.as_view(), name='logoutall')
+    path('register/', RegisterAPI.as_view(), name='register'),
+    path('login/', LoginAPI.as_view(), name='login'),
+    path('logout/', knox_views.LogoutView.as_view(), name='logout'),
+    path('logoutall/', knox_views.LogoutAllView.as_view(), name='logoutall')
 ]
 
 urlpatterns += router.urls

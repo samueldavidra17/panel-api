@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from .models import departamentos_empresas, empresas, marcas, tipos_equipos, tipos_equipos_marcas, departamentos, ubicaciones, usuarios, informacion, modelos, equipos, impresoras, dispositivos, asignaciones, estatus, so, tiposRam
+from .models import *
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 #DOCUMENTACION
-# model hace referencia a los modelos que vienen de models.py
+# model hace referencia a los modelos que vienen de py
 # fields hace referencia a los campos que se encuentran o dentro del modelo o que se
 # definen fuera de la clase Meta
 # create crea un objeto a partir de otro
@@ -26,7 +26,6 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = User.objects.create_user(validated_data['username'], validated_data['email'], validated_data['password'])
-
         return user
 
 class LoginSerializer(serializers.Serializer):
@@ -39,14 +38,311 @@ class LoginSerializer(serializers.Serializer):
             return user
         raise serializers.ValidationError("Incorrect Credentials")
 
-class impresorasSerializers(serializers.ModelSerializer):
+class EmpresasSerializers(serializers.ModelSerializer):
+    empresasDepartamentos = serializers.PrimaryKeyRelatedField(queryset=Departamentos.objects.all(), many=True)
+
     class Meta:
-        model = impresoras
+        model = Empresas
+        fields = ('id','nombre', 'empresasDepartamentos')
+    
+class DepartamentoSerializers(serializers.ModelSerializer):
+    empresas = serializers.PrimaryKeyRelatedField(queryset=Empresas.objects.all(), many=True)
+
+    class Meta:
+        model = Departamentos
+        fields = ('id','nombre', 'empresas')
+
+class UsuarioSerializers(serializers.ModelSerializer):
+    #se dan estos dos datos para luego que se cree la relacion si ese objeto existe
+    empresa = serializers.PrimaryKeyRelatedField(queryset=Empresas.objects.all(), many=False)
+    departamento = serializers.PrimaryKeyRelatedField(queryset=Departamentos.objects.all(), many=False)
+
+    class Meta:
+        model = Usuarios
+        fields = ('id','cargo','nombre', 'departamento', 'empresa')
+    #Se manda empresa y departamento y si ya estan relacionado ambas se trae el dato de departamentoEmpresas
+    def create(self, validated_data):
+        departamento = validated_data['departamento']
+        empresa = validated_data['empresa']
+        try:
+            departamentoEmpresa = DepartamentosEmpresas.objects.get(departamentos=departamento, empresas=empresa)
+            usuario = {
+                'cargo': validated_data['cargo'],
+                'nombre': validated_data['nombre'],
+                'departamentosEmpresas': departamentoEmpresa
+            }
+            return Usuarios.objects.create(**usuario)
+            
+        except DepartamentosEmpresas.DoesNotExist:
+            return HttpResponse("error message", status_code=500)
+
+    def update(self, instance, validated_data):
+        instance.nombre = validated_data['nombre']
+        instance.cargo = validated_data['cargo']
+        departamento = validated_data['departamento']
+        empresa = validated_data['empresa']
+        instance.departamentosEmpresas = DepartamentosEmpresas.objects.get(departamentos=departamento, empresas=empresa)
+        instance.save()
+        return instance
+
+    def to_representation(self, value):
+        return {
+            "id": value.id,
+            "cargo": value.cargo,
+            "nombre": value.nombre,
+            "departamentoNombre": value.departamentosEmpresas.departamentos.nombre,
+            "departamento": value.departamentosEmpresas.departamentos.id,
+            "empresa": value.departamentosEmpresas.empresas.id,
+            "empresaNombre": value.departamentosEmpresas.empresas.nombre
+        }
+
+class TiposEquipoSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = TiposEquipos
+        fields = ('id','nombre')
+
+    def create(self, validated_data):
+        idEquipo = TiposEquipos.objects.filter(id__startswith=validated_data["id"]).order_by("-id").values("id")[:1]
+        idNumber = idEquipo[0]["id"] if len(idEquipo) > 0 else validated_data["id"]+"-0"
+        idSplit = idNumber.split("-")[1] 
+        idNew = validated_data["id"]+"-"+str(int(idSplit)+1)
+        tipoEquipoNew = TiposEquipos.objects.create(id=idNew, nombre=validated_data["nombre"])
+        return tipoEquipoNew
+       
+class MarcaSerializers(serializers.ModelSerializer):
+    tipoEquipos = serializers.PrimaryKeyRelatedField(queryset=TiposEquipos.objects.all(), many=False)
+    modelos = serializers.ListField(child=serializers.CharField())
+
+    class Meta:
+        model = Marcas
+        fields = ('id','nombre','tipoEquipos', 'modelos')
+
+    def create(self, validated_data):
+        marca = Marcas.objects.create(nombre=validated_data['nombre'])
+        tiposEquiposMarcas = TiposEquiposMarcas.objects.create(marcas=marca, tiposEquipos=validated_data['tipoEquipos'])
+        if(len(validated_data['modelos']) > 0):
+            for x in validated_data['modelos']:
+                Modelos.objects.create(nombre=x, tiposEquiposMarcas=tiposEquiposMarcas)
+        return marca
+
+    def update(self, instance, validated_data):
+        instance.nombre = validated_data['nombre']
+        if(len(validated_data['modelos']) > 0):
+            tiposEquiposMarcas = TiposEquiposMarcas.objects.get(tiposEquipos=validated_data['tipoEquipos'], marcas=instance.id)
+            for x in validated_data['modelos']:
+                Modelos.objects.create(nombre=x, tiposEquiposMarcas=tiposEquiposMarcas)
+
+        instance.save()
+        return instance
+
+    def to_representation(self, value):
+        return {
+            "id": value.id, 
+            "nombre": value.nombre
+        }
+
+
+class ModeloSerializers(serializers.ModelSerializer):
+    tiposEquiposMarcas = serializers.PrimaryKeyRelatedField(queryset=TiposEquiposMarcas.objects.all(), many=False)
+
+    class Meta:
+        model = Modelos
+        fields = ('id','nombre','tiposEquiposMarcas')
+
+    def to_representation(self, value):
+        return {
+            "id": value.id, 
+            "nombre": value.nombre, 
+            "tiposEquiposMarcas": value.tiposEquiposMarcas.id
+        }
+
+class UbicacioneSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Ubicaciones
+        fields = ('id','nombre')
+
+class AsignacioneSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Asignaciones
+        fields = ('id','nombre')
+
+class EstatuSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Estatus
+        fields = ('id','nombre')
+
+class EstadoSerializers(serializers.ModelSerializer):
+    asignacion = serializers.PrimaryKeyRelatedField(queryset=Asignaciones.objects.all(), many=False)
+    estatus = serializers.PrimaryKeyRelatedField(queryset=Estatus.objects.all(), many=False)
+    ubicaciones = serializers.PrimaryKeyRelatedField(queryset=Ubicaciones.objects.all(), many=False)
+
+    class Meta:
+        model = Estado
+        fields = ('id','estatus','asignacion','observacion','ubicaciones')
+
+    def to_representation(self, value):
+        return {
+            "id": value.id,
+            "estatus": value.estatu.nombre,
+            "asignacion": value.asignacion.nombre,
+            "observacion": value.observacion,
+            "ubicaciones":{
+                "id": value.ubicaciones.id,
+                "nombre": value.ubicaciones.nombre
+            }
+        }
+        
+class TiposRamSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = TiposRam
+        fields = ('id','nombre')
+
+    
+class SoSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = So
+        fields = ('id','nombre')
+        
+class EquipoSerializers(serializers.ModelSerializer):
+    history = serializers.SerializerMethodField()
+    so = serializers.PrimaryKeyRelatedField(queryset=So.objects.all(), many=False)
+    tipo_ram = serializers.PrimaryKeyRelatedField(queryset=TiposRam.objects.all(), many=False)
+
+    class Meta:
+        model = Equipos
+        fields = '__all__'
+        read_only_fields = ('history',)
+
+    def create(self, validated_data):
+        info = Estado.objects.create()
+        return Equipos.objects.create(id=info,  **validated_data)
+
+    def to_representation(self, value):
+        #Se fragmenta para que en una vista detallada se muestren todos los datos de equipo
+        #Y en el otro solo unos especificos
+        if(type(value) != type({})):
+            #Objeto que viene desde historicalrecordfield
+            model = value.history.__dict__['model']
+            fields = ['usuario_id']
+            serializer = HistoricalRecordField(model, value.history.all(), fields=fields, many=True)
+            serializer.is_valid()
+            #Se define una variable para luego devolverla en un bucle que va a recorrer todos los objetos del historial
+            def represetancion(x):
+                return {
+                    "nombre": x.usuario.nombre if x.usuario is not None else "S/N",
+                    "depatamento": x.usuario.departamentosEmpresas.departamentos.nombre if x.usuario is not None else "S/N",
+                    "observacion": x.id.observacion
+                }
+            historial = map(represetancion, serializer.initial_data)
+            usuario = ''
+            departamento = ''
+            #Operador ternario
+            if(value.usuario is not None):
+                usuario = value.usuario.nombre
+                cargo = value.usuario.cargo
+                departamento = value.usuario.departamentosEmpresas.departamentos.nombre
+            else:
+                usuario = 'S/N'
+                departamento = 'It'
+            # return value.id.estatus
+            return {
+                'informacion': {
+                    'estatus': value.id.estatu.nombre,
+                    'asignacion': value.id.asignacion.nombre,
+                    'observacion': value.id.observacion,
+                    'ubicacion': value.id.ubicaciones.nombre,
+                },
+                'id': value.id_id,
+                'departamento': departamento,
+                'ubicacion': value.id.ubicaciones.nombre,
+                'serial': value.serial,
+                'serial_cargador': value.serial_cargador,
+                'serial_unidad': value.serial_unidad,
+                'dd': value.dd,
+                'ram': value.ram,
+                'tipo_ram': value.tipo_ram.nombre,
+                'csb': value.csb,
+                'tipo_equipo': value.modelo.tiposEquiposMarcas.tiposEquipos.nombre,
+                'tipoEquipos_id': value.modelo.tiposEquiposMarcas.tiposEquipos.id,
+                'antivirus': value.antivirus,
+                'nombre': value.nombre,
+                'so': value.so.nombre,
+                'modelo': value.modelo.nombre,
+                'modelo_id': value.modelo.id,
+                'marca': value.modelo.tiposEquiposMarcas.marcas.nombre,
+                'marca_id': value.modelo.tiposEquiposMarcas.marcas.id,
+                'usuario': usuario,
+                'usuario_cargo': cargo,
+                'empresa_id': value.empresas.id if value.empresas is not None else "S/N",
+                'historial': historial
+            }
+        else:
+            usuario = ''
+            if(value["usuario_id"] is not None):
+                usuario = value["usuario_id__nombre"]
+                departamento = value["usuario_id__departamentosEmpresas_id__departamentos_id__nombre"]
+            else:
+                usuario = 'Disponible'
+                departamento = 'It'
+            return {
+            "id": value["id"],
+            "ubicacion": value["id__ubicaciones__nombre"],
+            "serial": value["serial"],
+            "csb": value["csb"],
+            "tipo_equipo": value["modelo_id__tiposEquiposMarcas_id__tiposEquipos_id__nombre"],
+            "nombre": value["nombre"],
+            "modelo": value["modelo_id__nombre"],
+            "marca": value["modelo_id__tiposEquiposMarcas_id__marcas_id__nombre"],
+            "usuario": usuario,
+            "departamento": departamento
+        }
+
+class HistoricalRecordField(serializers.ModelSerializer):
+    #Creando el historial o la bitacora con la libreria de django-simple-history
+    def __init__(self, model, *args, fields='__all__', **kwargs):
+        self.Meta.model = model
+        self.Meta.fields = fields
+        super().__init__()
+
+    class Meta:
+        pass
+
+class HistorialSerializers(serializers.ModelSerializer):
+    history = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Equipos
+        fields = ('history','usuario')
+
+    def to_representation(self, value):
+        #Objeto que viene desde historicalrecordfield
+        model = value.history.__dict__['model']
+        fields = ['usuario_id','history_date']#using('it_db')
+        serializer = HistoricalRecordField(model, value.history.all(), fields=fields, many=True)
+        serializer.is_valid()
+        #Se define una variable para luego devolverla en un bucle que va a recorrer todos los objetos del historial
+        def represetancion(x):
+            return {
+                "usuario": x.usuario.nombre if x.usuario is not None else "S/N",
+                "cargo": x.usuario.cargo if x.usuario is not None else "S/N",
+                "fecha": x.history_date if x.history_date is not None else "S/N",
+                "departamento": x.usuario.departamentosEmpresas.departamentos.nombre if x.usuario is not None else "S/N",
+                "observacion": x.id.observacion
+            }
+        historial = map(represetancion, serializer.initial_data)
+
+        return{
+            "historial": historial
+        }
+
+class ImpresoraSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Impresoras
         fields = ('serial','csb','tipo_conexion','ip','departamento','toner','modelos')
 
     def create(self, validated_data):
-        info = informacion.objects.create()
-        return impresoras.objects.create(id=info, **validated_data)
+        info = Estado.objects.create()
+        return Impresoras.objects.create(id=info, **validated_data)
     
     def to_representation(self, instance):
         return {
@@ -67,11 +363,15 @@ class impresorasSerializers(serializers.ModelSerializer):
             "toner": instance.toner,
         } 
 
-class dispositivosSerializers(serializers.ModelSerializer):
+class DispositivoSerializers(serializers.ModelSerializer):
     class Meta:
-        model = dispositivos
+        model = Dispositivos
         fields = ('serial','csb', 'modelos','asignado')
-    
+
+    def create(self, validated_data):
+        info = Estado.objects.create()
+        return Dispositivos.objects.create(id=info, **validated_data)
+
     def to_representation(self, instance):
         return {
             "id": instance.id,
@@ -87,323 +387,3 @@ class dispositivosSerializers(serializers.ModelSerializer):
                             if instance.asignado is not None and instance.asignado.usuarios is not None
                             else "Sin asignar"
         }
-
-class tipos_equiposSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = tipos_equipos
-        fields = ('id','nombre')
-
-    def create(self, validated_data):
-        idEquipo = tipos_equipos.objects.filter(id__startswith=validated_data["id"]).order_by("-id").values("id")[:1]
-        idNumber = idEquipo[0]["id"] if len(idEquipo) > 0 else validated_data["id"]+"-0"
-        idSplit = idNumber.split("-")[1] 
-        idNew = validated_data["id"]+"-"+str(int(idSplit)+1)
-        tipoEquipoNew = tipos_equipos.objects.create(id=idNew, nombre=validated_data["nombre"])
-        return tipoEquipoNew
-       
-
-class tipos_equipos_marcasSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = tipos_equipos_marcas
-        fields = ('id','marcas')
-
-class marcasSerializers(serializers.ModelSerializer):
-    tipoEquipos = serializers.PrimaryKeyRelatedField(queryset=tipos_equipos.objects.all(), many=False)
-    modelos = serializers.ListField(child=serializers.CharField())
-
-    class Meta:
-        model = marcas
-        fields = ('id','nombre','tipoEquipos', 'modelos')
-
-    def create(self, validated_data):
-        marca = marcas.objects.create(nombre=validated_data['nombre'])
-        tiposEquiposMarcas = tipos_equipos_marcas.objects.create(marcas=marca, tiposEquipos=validated_data['tipoEquipos'])
-        if(len(validated_data['modelos']) > 0):
-            for x in validated_data['modelos']:
-                modelos.objects.create(nombre=x, tiposEquiposMarcas=tiposEquiposMarcas)
-        return marca
-
-    def update(self, instance, validated_data):
-        instance.nombre = validated_data['nombre']
-        if(len(validated_data['modelos']) > 0):
-            tiposEquiposMarcas = tipos_equipos_marcas.objects.get(tiposEquipos=validated_data['tipoEquipos'], marcas=instance.id)
-            for x in validated_data['modelos']:
-                modelos.objects.create(nombre=x, tiposEquiposMarcas=tiposEquiposMarcas)
-
-        instance.save()
-        return instance
-
-    def to_representation(self, value):
-        return {"id": value.id, "nombre": value.nombre}
-
-
-class modelosSerializers(serializers.ModelSerializer):
-    tiposEquiposMarcas = serializers.PrimaryKeyRelatedField(queryset=tipos_equipos_marcas.objects.all(), many=False)
-
-    class Meta:
-        model = modelos
-        fields = ('id','nombre','tiposEquiposMarcas')
-
-    def to_representation(self, value):
-        return {"id": value.id, "nombre": value.nombre, "tiposEquiposMarcas": value.tiposEquiposMarcas.id}
-
-class informacionSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = informacion
-        fields = ('id','estatus','asignacion','observacion','ubicaciones')
-
-    def to_representation(self, value):
-        return {
-            "id": value.id,
-            "estatus": value.estatus,
-            "asignacion": value.asignacion,
-            "observacion": value.observacion,
-            "ubicaciones":{
-                "id": value.ubicaciones.id,
-                "nombre": value.ubicaciones.nombre
-            }
-        }
-
-class HistoricalRecordField(serializers.ModelSerializer):
-    #Creando el historial o la bitacora con la libreria de django-simple-history
-    def __init__(self, model, *args, fields='__all__', **kwargs):
-        self.Meta.model = model
-        self.Meta.fields = fields
-        super().__init__()
-
-    class Meta:
-        pass
-
-class historialSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = equipos
-        fields = ('history','usuarios')
-    
-    history = serializers.SerializerMethodField()
-
-    def create(self, validated_data):
-        print(validated_data)
-        info = informacion.objects.create()
-        return equipos.objects.create(id=info, **validated_data)
-
-    def to_representation(self, value):
-        #Objeto que viene desde historicalrecordfield
-        model = value.history.__dict__['model']
-        fields = ['usuarios_id','history_date']#using('it_db')
-        serializer = HistoricalRecordField(model, value.history.all(), fields=fields, many=True)
-        serializer.is_valid()
-        #Se define una variable para luego devolverla en un bucle que va a recorrer todos los objetos del historial
-        def represetancion(x):
-            return {
-                "usuario": x.usuarios.nombre if x.usuarios is not None else "S/N",
-                "cargo": x.usuarios.cargo if x.usuarios is not None else "S/N",
-                "fecha": x.history_date if x.history_date is not None else "S/N",
-                "departamento": x.usuarios.departamentosEmpresas.departamentos.nombre if x.usuarios is not None else "S/N",
-                "observacion": x.id.observacion
-            }
-        historial = map(represetancion, serializer.initial_data)
-
-        return{
-            "historial": historial
-        }
-class equiposSerializers(serializers.ModelSerializer):
-    history = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = equipos
-        fields = ('serial','serial_cargador','serial_unidad','dd','ram','tipo_ram','csb','antivirus','usuario_so','so','modelos','usuarios','empresas', 'history')
-        read_only_fields = ('history',)
-
-    def create(self, validated_data):
-        info = informacion.objects.create()
-        return equipos.objects.create(id=info,  **validated_data)
-
-    def to_representation(self, value):
-        #Se fragmenta para que en una vista detallada se muestren todos los datos de equipo
-        #Y en el otro solo unos especificos
-        if(type(value) != type({})):
-            #Objeto que viene desde historicalrecordfield
-            model = value.history.__dict__['model']
-            fields = ['usuarios_id']
-            serializer = HistoricalRecordField(model, value.history.all(), fields=fields, many=True)
-            serializer.is_valid()
-            #Se define una variable para luego devolverla en un bucle que va a recorrer todos los objetos del historial
-            def represetancion(x):
-                return {
-                    "nombre": x.usuarios.nombre if x.usuarios is not None else "S/N",
-                    "depatamento": x.usuarios.departamentosEmpresas.departamentos.nombre if x.usuarios is not None else "S/N",
-                    "observacion": x.id.observacion
-                }
-            historial = map(represetancion, serializer.initial_data)
-            usuario = ''
-            departamento = ''
-            #Operador ternario
-            if(value.usuarios is not None):
-                usuario = value.usuarios.nombre
-                cargo = value.usuarios.cargo
-                departamento = value.usuarios.departamentosEmpresas.departamentos.nombre
-            else:
-                usuario = 'S/N'
-                departamento = 'It'
-            # return value.id.estatus
-            return {
-                'informacion': {
-                    'estatus': value.id.estatus,
-                    'asignacion': value.id.asignacion,
-                    'observacion': value.id.observacion,
-                    'ubicacion': value.id.ubicaciones.nombre,
-                },
-                'id': value.id_id,
-                'departamento': departamento,
-                'ubicacion': value.id.ubicaciones.nombre,
-                'serial': value.serial,
-                'serial_cargador': value.serial_cargador,
-                'serial_unidad': value.serial_unidad,
-                'dd': value.dd,
-                'ram': value.ram,
-                'tipo_ram': value.tipo_ram,
-                'csb': value.csb,
-                'tipo_equipo': value.modelos.tiposEquiposMarcas.tiposEquipos.nombre,
-                'tipoEquipos_id': value.modelos.tiposEquiposMarcas.tiposEquipos.id,
-                'antivirus': value.antivirus,
-                'usuario_so': value.usuario_so,
-                'so': value.so,
-                'modelos': value.modelos.nombre,
-                'modelo_id': value.modelos.id,
-                'marca': value.modelos.tiposEquiposMarcas.marcas.nombre,
-                'marca_id': value.modelos.tiposEquiposMarcas.marcas.id,
-                'usuario': usuario,
-                'usuario_cargo': cargo,
-                'empresa_id': value.empresas.id if value.empresas is not None else "S/N",
-                'historial': historial
-            }
-        else:
-            usuario = ''
-            if(value["usuarios_id"] is not None):
-                usuario = value["usuarios_id__nombre"]
-                departamento = value["usuarios_id__departamentosEmpresas_id__departamentos_id__nombre"]
-            else:
-                usuario = 'Disponible'
-                departamento = 'It'
-            return {
-            "id": value["id"],
-            "ubicacion": value["id__ubicaciones__nombre"],
-            "serial": value["serial"],
-            "csb": value["csb"],
-            "tipo_equipo": value["modelos_id__tiposEquiposMarcas_id__tiposEquipos_id__nombre"],
-            "usuario_so": value["usuario_so"],
-            "modelo": value["modelos_id__nombre"],
-            "marca": value["modelos_id__tiposEquiposMarcas_id__marcas_id__nombre"],
-            "usuario": usuario,
-            "departamento": departamento
-        }
-
-class ubicacionesSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = ubicaciones
-        fields = ('id','nombre')
-
-class empresasSerializers(serializers.ModelSerializer):
-    empresasDepartamentos = serializers.PrimaryKeyRelatedField(queryset=departamentos.objects.all(), many=True)
-
-    class Meta:
-        model = empresas
-        fields = ('id','nombre', 'empresasDepartamentos')
-    
-class departamentoSerializers(serializers.ModelSerializer):
-    empresas = serializers.PrimaryKeyRelatedField(queryset=empresas.objects.all(), many=True)
-    class Meta:
-        model = departamentos
-        fields = ('id','nombre', 'empresas')
-
-class usuariosSerializers(serializers.ModelSerializer):
-    #se dan estos dos datos para luego que se cree la relacion si ese objeto existe
-    empresa = serializers.PrimaryKeyRelatedField(queryset=empresas.objects.all(), many=False)
-    departamento = serializers.PrimaryKeyRelatedField(queryset=departamentos.objects.all(), many=False)
-    class Meta:
-        model = usuarios
-        fields = ('id','cargo','nombre', 'departamento', 'empresa')
-
-    #Se manda empresa y departamento y si ya estan relacionado ambas se trae el dato de departamentoEmpresas
-    def create(self, validated_data):
-        try:
-            departamentoEmpresa = departamentos_empresas.objects.get(departamentos=validated_data['departamento'], empresas=validated_data['empresa'])
-            usuario = {
-                'cargo': validated_data['cargo'],
-                'nombre': validated_data['nombre'],
-                'departamentosEmpresas': departamentoEmpresa
-            }
-            return usuarios.objects.create(**usuario)
-        except departamentos_empresas.DoesNotExist:
-            return HttpResponse("error message", status_code=500)
-
-    def update(self, instance, validated_data):
-        instance.nombre = validated_data['nombre']
-        instance.cargo = validated_data['cargo']
-        instance.departamentosEmpresas = departamentos_empresas.objects.get(departamentos=validated_data['departamento'], empresas=validated_data['empresa'])
-        instance.save()
-        return instance
-
-    def to_representation(self, value):
-        return {
-            "id": value.id,
-            "cargo": value.cargo,
-            "nombre": value.nombre,
-            "departamentoNombre": value.departamentosEmpresas.departamentos.nombre,
-            "departamento": value.departamentosEmpresas.departamentos.id,
-            "empresa": value.departamentosEmpresas.empresas.id,
-            "empresaNombre": value.departamentosEmpresas.empresas.nombre
-        }
-
-class asignacionesSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = asignaciones
-        fields = ('id','nombre')
-
-class estatusSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = estatus
-        fields = ('id','nombre')
-
-class tiposRamSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = tiposRam
-        fields = ('id','nombre')
-
-    
-class soSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = so
-        fields = ('id','nombre')
-
-class asignacionesMinSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = asignaciones
-        fields = ('id','nombre')
-
-    def to_representation(self, value):
-        return value.nombre
-
-class estatusMinSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = estatus
-        fields = ('id','nombre')
-
-    def to_representation(self, value):
-        return value.nombre
-
-class tiposRamMinSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = tiposRam
-        fields = ('id','nombre')
-
-    def to_representation(self, value):
-        return value.nombre
-
-class soMinSerializers(serializers.ModelSerializer):
-    class Meta:
-        model = so
-        fields = ('id','nombre')
-
-    def to_representation(self, value):
-        return value.nombre

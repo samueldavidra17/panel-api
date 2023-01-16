@@ -20,7 +20,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 urlpatterns = [
     path('admin/', admin.site.urls),
     #estos path include hacen referencia a la carpeta junto con el urls.py
-    path('', include('it.urls')),
+    path('api/', include('it.urls')),
 ]
 
 urlpatterns += staticfiles_urlpatterns()
