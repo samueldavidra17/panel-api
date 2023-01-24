@@ -16,7 +16,6 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
@@ -26,18 +25,26 @@ SECRET_KEY = 'django-insecure-=_dj0&(!qj7x@(&3v(r_#0c*xqnc^adstj&=&82ky3#_hcg-d=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+#CORS HEADERS
 ALLOWED_HOSTS = ["*"]
 
 CORS_ALLOW_ALL_ORIGINS = False
-CORS_ORIGIN_WHITELIST = ("*")
+
 CORS_ALLOW_HEADERS = "*"
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = ["*"]
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost",
+]
+
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost:3000",
+    "http://localhost",
+]
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -76,22 +83,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://www.panel-it.com",
-    "http://www.panel-it.com:3000",
-    "http://172.17.245.162:3000",
-    "http://172.17.247.254"
-]
-
-CORS_ORIGIN_WHITELIST = [
-    "http://localhost:3000",
-    "http://www.panel-it.com",
-    "http://www.panel-it.com:3000",
-    "http://172.17.245.162:3000",
-    "http://172.17.247.254"
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -166,11 +157,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR,'public')
-# ]
-
-#STATIC_ROOT = os.path.join(BASE_DIR, '/')
+STATIC_ROOT = os.path.join(BASE_DIR, '/')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field

@@ -200,16 +200,6 @@ class SoSerializers(serializers.ModelSerializer):
         model = So
         fields = ('id','nombre')
 
-class HistoricalRecordField(serializers.ModelSerializer):
-    #Creando el historial o la bitacora con la libreria de django-simple-history
-    def __init__(self, model, *args, fields='__all__', **kwargs):
-        self.Meta.model = model
-        self.Meta.fields = fields
-        super().__init__()
-
-    class Meta:
-        pass
-
 class EquipoSerializers(serializers.ModelSerializer):
     history = serializers.SerializerMethodField()
     so = serializers.PrimaryKeyRelatedField(queryset=So.objects.all(), many=False)
@@ -226,75 +216,67 @@ class EquipoSerializers(serializers.ModelSerializer):
 
     def to_representation(self, value):
         #Se fragmenta para que en una vista detallada se muestren todos los datos de equipo
-        #Y en el otro solo unos especificos
-        if(type(value) != type({})):
-            usuario = ''
-            departamento = ''
-            cargo = ''
-            #Operador ternario
-            if(value.usuario is not None):
-                usuario = value.usuario.nombre
-                cargo = value.usuario.cargo
-                departamento = value.usuario.departamentosEmpresas.departamentos.nombre
-            else:
-                usuario = 'S/N'
-                departamento = 'It'
-            # return value.id.estatus
-            return {
-                'informacion': {
-                    'estatus_id': value.id.estatu.id,
-                    'estatus': value.id.estatu.nombre,
-                    'asignacion_id': value.id.asignacion.id,
-                    'asignacion': value.id.asignacion.nombre,
-                    'observacion': value.id.observacion,
-                    'ubicacion_id': value.id.ubicaciones.id,
-                    'ubicacion': value.id.ubicaciones.nombre,
-                },
-                'id': value.id_id,
-                'departamento': departamento,
-                'ubicacion': value.id.ubicaciones.nombre,
-                'serial': value.serial,
-                'serial_cargador': value.serial_cargador,
-                'serial_unidad': value.serial_unidad,
-                'dd': value.dd,
-                'ram': value.ram,
-                'tipo_ram_id': value.tipo_ram.id,
-                'tipo_ram': value.tipo_ram.nombre,
-                'csb': value.csb,
-                'tipo_equipo': value.modelo.tiposEquiposMarcas.tiposEquipos.nombre,
-                'tipoEquipos_id': value.modelo.tiposEquiposMarcas.tiposEquipos.id,
-                'antivirus': value.antivirus,
-                'nombre': value.nombre,
-                'so_id': value.so.id,
-                'so': value.so.nombre,
-                'modelo': value.modelo.nombre,
-                'modelo_id': value.modelo.id,
-                'marca': value.modelo.tiposEquiposMarcas.marcas.nombre,
-                'marca_id': value.modelo.tiposEquiposMarcas.marcas.id,
-                'usuario': usuario,
-                'usuario_cargo': cargo,
-                'empresa_id': value.empresas.id if value.empresas is not None else "S/N"
-            }
+        if(type(value) == type({})):
+            #renombro los campos user y model 
+            value["usuario"] = value.pop("user")
+            value["modelo"] = value.pop("model")
+            return value
+
+        usuario = ''
+        departamento = ''
+        cargo = ''
+        #Operador ternario
+        if(value.usuario is not None):
+            usuario = value.usuario.nombre
+            cargo = value.usuario.cargo
+            departamento = value.usuario.departamentosEmpresas.departamentos.nombre
         else:
-            usuario = ''
-            if(value["usuario_id"] is not None):
-                usuario = value["usuario_id__nombre"]
-                departamento = value["usuario_id__departamentosEmpresas_id__departamentos_id__nombre"]
-            else:
-                usuario = 'Disponible'
-                departamento = 'It'
-            return {
-            "id": value["id"],
-            "ubicacion": value["id__ubicaciones__nombre"],
-            "serial": value["serial"],
-            "csb": value["csb"],
-            "tipo_equipo": value["modelo_id__tiposEquiposMarcas_id__tiposEquipos_id__nombre"],
-            "nombre": value["nombre"],
-            "modelo": value["modelo_id__nombre"],
-            "marca": value["modelo_id__tiposEquiposMarcas_id__marcas_id__nombre"],
-            "usuario": usuario,
-            "departamento": departamento
+            usuario = 'S/N'
+            cargo = 'S/N'
+            departamento = 'S/N'
+        # return value.id.estatus
+        return {
+            'informacion': {
+                'estatus': value.id.estatu.nombre,
+                'asignacion': value.id.asignacion.nombre,
+                'observacion': value.id.observacion,
+                'ubicacion': value.id.ubicaciones.nombre,
+            },
+            'id': value.id_id,
+            'departamento': departamento,
+            'ubicacion': value.id.ubicaciones.nombre,
+            'serial': value.serial,
+            'serial_cargador': value.serial_cargador,
+            'serial_unidad': value.serial_unidad,
+            'dd': value.dd,
+            'ram': value.ram,
+            'tipo_ram_nombre': value.tipo_ram.nombre,
+            'tipo_ram': value.tipo_ram.id,
+            'csb': value.csb,
+            'tipo_equipo': value.modelo.tiposEquiposMarcas.tiposEquipos.nombre,
+            'tipoEquipos_id': value.modelo.tiposEquiposMarcas.tiposEquipos.id,
+            'antivirus': value.antivirus,
+            'nombre': value.nombre,
+            'so': value.so.id,
+            'so_nombre': value.so.nombre,
+            'modelo': value.modelo.nombre,
+            'modelo_id': value.modelo.id,
+            'marca': value.modelo.tiposEquiposMarcas.marcas.nombre,
+            'marca_id': value.modelo.tiposEquiposMarcas.marcas.id,
+            'usuario': usuario,
+            'usuario_cargo': cargo,
+            'empresa_id': value.empresas.id
         }
+
+class HistoricalRecordField(serializers.ModelSerializer):
+    #Creando el historial o la bitacora con la libreria de django-simple-history
+    def __init__(self, model, *args, fields='__all__', **kwargs):
+        self.Meta.model = model
+        self.Meta.fields = fields
+        super().__init__()
+
+    class Meta:
+        pass
 
 class HistorialSerializers(serializers.ModelSerializer):
     history = serializers.SerializerMethodField()
@@ -320,7 +302,7 @@ class HistorialSerializers(serializers.ModelSerializer):
             }
         historial = map(represetancion, serializer.initial_data)
 
-        return{
+        return {
             "historial": historial
         }
 

@@ -4,9 +4,8 @@ from rest_framework import viewsets, permissions, filters, generics
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 import django_filters.rest_framework
-from django.db.models import Q
+from django.db.models import Q, F
 from drf_multiple_model.viewsets import ObjectMultipleModelAPIViewSet
-from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import BasePermission
 from knox.models import AuthToken  
 
@@ -134,22 +133,18 @@ class SoViewSet(viewsets.ModelViewSet):
     serializer_class = SoSerializers
 
 class EquiposViewSet(viewsets.ModelViewSet):
+    queryset = Equipos.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = EquipoSerializers
     filter_backends = [filters.SearchFilter, django_filters.rest_framework.DjangoFilterBackend]
     search_fields = ['serial','serial_cargador','serial_unidad','dd','ram','tipo_ram','csb','antivirus','nombre','so']
     filterset_fields = ['usuario_id']
-
-    ### get_queryset sirve para traer todos los objetos de equipo y retornarlos###
-    def get_queryset(self):
-        queryset = Equipos.objects.all()
-        return queryset
-
+    
     def partial_update(self, request, *args, **kwargs):
         equipo = self.get_object()
         data = request.data
         try:
-            print(data)
+            #Actualizo el usuario creado historial
             usuario = Usuarios.objects.get(pk=data["usuario"])
             equipo.usuario = usuario
             equipo.save()
@@ -161,52 +156,54 @@ class EquiposViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         equipo = self.get_object()
         data = request.data
-        
+        #se acualiza los datos
         equipo.serial = data.get("serial", equipo.serial)
         equipo.serial_cargador = data.get("serial_cargador", equipo.serial_cargador)
         equipo.serial_unidad = data.get("serial_unidad", equipo.serial_unidad)
-        equipo.so = data.get("so", equipo.so)
+        so = So.objects.get(pk=data.get("so", equipo.so))
+        equipo.so = so
         equipo.csb = data.get("csb", equipo.csb)
         equipo.dd = data.get("dd", equipo.dd)
         equipo.ram = data.get("ram", equipo.ram)
-        equipo.tipo_ram = data.get("tipo_ram", equipo.tipo_ram)
+        tipoRam = TiposRam.objects.get(pk=data.get("tipo_ram", equipo.tipo_ram))
+        equipo.tipo_ram = tipoRam
         equipo.nombre = data.get("nombre", equipo.nombre)
         equipo.antivirus = data.get("antivirus", equipo.antivirus)
-
+        #actualizo sin  crear un historial
         equipo.save_without_history()
         serializer = EquipoSerializers(equipo)    
         return Response(serializer.data)
 
     def list(self, request):
-        queryset = Equipos.objects.values('id','empresas_id__nombre','id__ubicaciones__nombre',
-        'serial','csb','nombre','modelo_id__nombre',
-        'modelo_id__tiposEquiposMarcas_id__marcas_id__nombre', 'usuario_id',
-        'usuario_id__nombre', 
-        'usuario_id__departamentosEmpresas_id__departamentos_id__nombre',
-        'modelo_id__tiposEquiposMarcas_id__tiposEquipos_id__nombre',
-        'empresas_id__id')
+        queryset = Equipos.objects.values(
+            'id', 
+            'serial', 
+            'csb', 
+            'nombre', 
+            ubicacion=F('id__ubicaciones__nombre'),
+            model=F('modelo_id__nombre'),
+            tipo_equipo=F('modelo_id__tiposEquiposMarcas_id__tiposEquipos_id__nombre'), 
+            user=F('usuario_id__nombre'), 
+            departamento=F('usuario_id__departamentosEmpresas_id__departamentos_id__nombre')
+        ) 
         search = request.query_params.get('search', None)
         ###Filtros hechos a mano donde startwith se refiere a la letra inicial###
         if search:
-            queryset=queryset.filter(
-            Q(serial__startswith = search.upper()) |
-            Q(empresas_id__nombre__startswith = search.upper()) |
-            Q(id__ubicaciones__nombre__startswith = search.upper()) |
-            Q(csb__startswith = search.upper()) |
-            Q(nombre__startswith = search.upper()) |
-            Q(modelo_id__nombre__startswith = search.upper()) |
-            Q(modelo_id__tiposEquiposMarcas_id__marcas_id__nombre__startswith = search.upper()) |
-            Q(usuario_id__nombre__startswith = search.upper()) 
-            ) 
-
-
+            search = search.upper()
+            queryset = queryset.filter(
+            Q(serial__startswith = search) |
+            Q(id__ubicaciones__nombre__startswith = search) |
+            Q(csb__startswith = search) |
+            Q(nombre__startswith = search) |
+            Q(modelo_id__nombre__startswith = search) |
+            Q(modelo_id__tiposEquiposMarcas_id__marcas_id__nombre__startswith = search) |
+            Q(usuario_id__nombre__startswith = search) 
+        )
         ###Paginacion###
         page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = EquipoSerializers(page, many=True)
-            return self.get_paginated_response(serializer.data)
-        serializer = EquipoSerializers(queryset, many=True)
-        return Response(serializer.data)
+        #Respuesta dependiendo si se pagina o no
+        serializers = EquipoSerializers(queryset if not page else page, many=True)
+        return Response(serializers.data) if not page else self.get_paginated_response(serializers.data)
 
 class HistorialEquiposViewSet(viewsets.ModelViewSet):
     queryset = Equipos.objects.all()
