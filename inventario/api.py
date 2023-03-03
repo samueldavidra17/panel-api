@@ -122,6 +122,24 @@ class EstadosViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter]
     search_fields = ['asignacion']
 
+    def update(self, request, *args, **kwargs):
+        estado = self.get_object()
+        data = request.data
+        try:
+            #Actualizo el usuario creado historial
+            asignacion = Asignaciones.objects.get(pk=data["asignacion"])
+            estado.asignacion = asignacion
+            estatu = Estatus.objects.get(pk=data["estatus"])
+            estado.estatu = estatu
+            ubicaciones = Ubicaciones.objects.get(pk=data["ubicaciones"])
+            estado.ubicaciones = ubicaciones
+            estado.observacion = data["observacion"]
+            estado.save()
+            serializer = EstadoSerializers(estado)
+            return Response(serializer.data)
+        except KeyError:
+            pass 
+
 class TiposRamViewSet(viewsets.ModelViewSet):
     queryset = TiposRam.objects.all()
     permission_classes = [permissions.IsAuthenticated]
@@ -160,6 +178,9 @@ class EquiposViewSet(viewsets.ModelViewSet):
         equipo.serial = data.get("serial", equipo.serial)
         equipo.serial_cargador = data.get("serial_cargador", equipo.serial_cargador)
         equipo.serial_unidad = data.get("serial_unidad", equipo.serial_unidad)
+        print(data.get("modelo", equipo.modelo))
+        modelo = Modelos.objects.get(pk=data.get("modelo", equipo.modelo))
+        equipo.modelo = modelo
         so = So.objects.get(pk=data.get("so", equipo.so))
         equipo.so = so
         equipo.csb = data.get("csb", equipo.csb)
@@ -184,7 +205,8 @@ class EquiposViewSet(viewsets.ModelViewSet):
             model=F('modelo_id__nombre'),
             tipo_equipo=F('modelo_id__tiposEquiposMarcas_id__tiposEquipos_id__nombre'), 
             user=F('usuario_id__nombre'), 
-            departamento=F('usuario_id__departamentosEmpresas_id__departamentos_id__nombre')
+            departamento=F('usuario_id__departamentosEmpresas_id__departamentos_id__nombre'),
+            marca=F('modelo_id__tiposEquiposMarcas_id__marcas_id__nombre')
         ) 
         search = request.query_params.get('search', None)
         ###Filtros hechos a mano donde startwith se refiere a la letra inicial###
