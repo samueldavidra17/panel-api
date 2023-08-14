@@ -217,6 +217,7 @@ class EquiposViewSet(viewsets.ModelViewSet):
             Q(id__ubicaciones__nombre__startswith = search) |
             Q(csb__startswith = search) |
             Q(nombre__startswith = search) |
+            Q(serial_cargador__startswith = search) |
             Q(modelo_id__nombre__startswith = search) |
             Q(modelo_id__tiposEquiposMarcas_id__marcas_id__nombre__startswith = search) |
             Q(usuario_id__nombre__startswith = search) 
