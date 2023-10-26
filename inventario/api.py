@@ -201,6 +201,7 @@ class EquiposViewSet(viewsets.ModelViewSet):
             'serial', 
             'csb', 
             'nombre', 
+            estatu=F('id__estatu__nombre'),
             ubicacion=F('id__ubicaciones__nombre'),
             model=F('modelo_id__nombre'),
             tipo_equipo=F('modelo_id__tiposEquiposMarcas_id__tiposEquipos_id__nombre'), 
@@ -214,6 +215,7 @@ class EquiposViewSet(viewsets.ModelViewSet):
             search = search.upper()
             queryset = queryset.filter(
             Q(serial__startswith = search) |
+            Q(id__estatu__nombre__startswith = search) |
             Q(id__ubicaciones__nombre__startswith = search) |
             Q(csb__startswith = search) |
             Q(nombre__startswith = search) |
